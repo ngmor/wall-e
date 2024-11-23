@@ -1,0 +1,5 @@
+#!/bin/sh
+# This is a basic convenience script that allows running a cross compile colcon build command
+# inside the cross-compiling docker container
+
+$(dirname "$(readlink -f "$0")")/run colcon-aarch64 $@
