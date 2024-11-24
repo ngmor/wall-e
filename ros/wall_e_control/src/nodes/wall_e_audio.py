@@ -24,7 +24,7 @@ class WALLEAudio(Node):
         # PARAMETERS ---------------------------------------------------------------------------
         self.declare_parameter(
             'default_volume',
-            70,
+            100,
             ParameterDescriptor(
                 description='Default volume to set on startup (%). If negative, the default will'
                 ' not be set on startup. Otherwise clamped between [0, 100]'
