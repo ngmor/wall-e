@@ -15,7 +15,7 @@ file(GLOB_RECURSE SERVICES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} srv/*)
 rosidl_generate_interfaces(${PROJECT_NAME}
   # ${MESSAGES} TODO add
   ${SERVICES}
-  DEPENDENCIES
+  # DEPENDENCIES
   # TODO add
 )
 

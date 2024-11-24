@@ -1,0 +1,12 @@
+<launch>
+  <!-- Launch arguments -->
+  <arg name="audio_config_file" default="$(find-pkg-share wall_e_control)/config/audio.yaml"
+    description="File path of config file for the WALL-E audio node"
+  />
+
+  <!-- Run audio node -->
+  <node pkg="wall_e_control" exec="wall_e_audio" output="screen">
+    <param from="$(var audio_config_file)"/>
+  </node>
+
+</launch>

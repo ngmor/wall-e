@@ -16,12 +16,31 @@ find_package(wall_e_interfaces REQUIRED)
 
 # Install
 
+# Nodes
+
 # WALL-E audio node
 install(PROGRAMS
   src/nodes/wall_e_audio.py RENAME wall_e_audio
   DESTINATION lib/${PROJECT_NAME}
 )
 
+# Config files
+install(
+  DIRECTORY config
+  DESTINATION share/${PROJECT_NAME}
+)
+
+# Launch files
+install(
+  DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
+)
+
+# Sounds
+install(
+  DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../web_interface/static/sounds
+  DESTINATION share/${PROJECT_NAME}
+)
 
 
 if(BUILD_TESTING)
