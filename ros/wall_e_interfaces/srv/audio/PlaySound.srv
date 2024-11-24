@@ -1,0 +1,13 @@
+#
+# Play a preconfigured sound, by the configured name
+#
+
+# REQUEST -------------------------------------------------------------------------------------
+
+# Name of sound to play
+string sound
+---
+# RESPONSE -------------------------------------------------------------------------------------
+
+# True if successfully played
+bool success

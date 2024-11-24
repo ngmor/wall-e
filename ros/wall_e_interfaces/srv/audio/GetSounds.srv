@@ -1,0 +1,10 @@
+#
+# Get a list of the names of available preconfigured sounds
+#
+
+# REQUEST -------------------------------------------------------------------------------------
+---
+# RESPONSE -------------------------------------------------------------------------------------
+
+# List of the names of available preconfigured sounds
+string[] sounds
