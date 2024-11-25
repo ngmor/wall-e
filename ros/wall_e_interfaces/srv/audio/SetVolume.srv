@@ -1,0 +1,11 @@
+#
+# Set the speaker volume by percentage
+#
+
+# REQUEST -------------------------------------------------------------------------------------
+
+# Volume to be set, will be clamped between 0 and 100
+uint8 volume
+
+---
+# RESPONSE -------------------------------------------------------------------------------------

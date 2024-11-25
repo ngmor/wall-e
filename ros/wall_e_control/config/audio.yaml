@@ -1,0 +1,32 @@
+/**:
+  ros__parameters:
+    default_volume: -1 #TODO change
+    sounds:
+      names: [
+        'ohhh',
+        'raspberry',
+        'tada1',
+        'tada2',
+        'uh-huh',
+        'whistle1',
+        'whistle2',
+        'whoa',
+        'wow',
+        'wall-e1',
+        'wall-e2',
+        'wall-e3',
+      ]
+      files: [
+        'Sound_Ohhh_1850.wav',
+        'Sound_Raspberry_1550.wav',
+        'Sound_Tada_1500.wav',
+        'Sound_Tada-long_10200.wav',
+        'Sound_Uh-Huh_550.wav',
+        'Sound_Whistle-1_1150.wav',
+        'Sound_Whistle-2_550.wav',
+        'Sound_Whoa_1300.wav',
+        'Sound_Wow_810.wav',
+        'Voice_Walle-1_1950.wav',
+        'Voice_Walle-2_3900.wav',
+        'Voice_Walle-3_1700.wav',
+      ]

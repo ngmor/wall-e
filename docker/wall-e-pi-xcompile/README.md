@@ -26,7 +26,7 @@ cd ${ws}
 # OR
 
 # Use docker to cross compile (runs the above command)
-./src/wall-e/docker/wall-e-pi-xcompile/xcompile ${build-args}
+./src/wall-e/docker/wall-e-pi-xcompile/x-compile ${build-args}
 
 # Could also add an alias to .bashrc, something like:
 alias colcon-wall-e-xcompile='docker run -it -u $(id -u):$(id -g) -v "$(pwd)":/ros_ws "wall-e-pi-xcompile" colcon-aarch64'
