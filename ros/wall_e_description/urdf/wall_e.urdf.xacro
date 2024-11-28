@@ -1,0 +1,276 @@
+<?xml version="1.0" ?>
+<robot name="wall_e" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <material name="yellow">
+      <color rgba="0.961 0.729 0.259 1.0"/>
+  </material>
+
+  <material name="gray">
+    <color rgba="0.5 0.5 0.5 1.0"/>
+  </material>
+
+  <material name="black">
+      <color rgba="0.0 0.0 0.0 1.0"/>
+  </material>
+
+  <!-- TODO collision/inertial components -->
+
+  <link name="base_footprint"/>
+
+  <joint name="base_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0.0 0.0 0.15" rpy="0.0 0.0 0.0"/> <!--TODO fix offset of link-->
+  </joint>
+
+  <link name="base_link">
+    <visual>
+      <origin xyz="0.15 -0.15 -0.15" rpy="0.0 0.0 1.570796327"/> <!--TODO fix origin of mesh-->
+      <geometry>
+        <mesh filename="package://wall_e_description/meshes/body.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="yellow"/>
+    </visual>
+  </link>
+
+  <joint name="drivetrain_right_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="drivetrain_right_link"/>
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+  </joint>
+
+  <link name="drivetrain_right_link">
+    <visual>
+      <origin xyz="0.15 -0.15 -0.15" rpy="0.0 0.0 1.570796327"/> <!--TODO fix origin of mesh-->
+      <geometry>
+        <mesh filename="package://wall_e_description/meshes/drivetrain-right.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+  </link>
+
+  <joint name="drivetrain_left_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="drivetrain_left_link"/>
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+  </joint>
+
+  <link name="drivetrain_left_link">
+    <visual>
+      <origin xyz="0.15 -0.15 -0.15" rpy="0.0 0.0 1.570796327"/> <!--TODO fix origin of mesh-->
+      <geometry>
+        <mesh filename="package://wall_e_description/meshes/drivetrain-left.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+  </link>
+
+  <joint name="track_right_joint" type="fixed">
+    <parent link="drivetrain_right_link"/>
+    <child link="track_right_link"/>
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+  </joint>
+
+  <link name="track_right_link">
+    <visual>
+      <origin xyz="0.15 -0.15 -0.15" rpy="0.0 0.0 1.570796327"/> <!--TODO fix origin of mesh-->
+      <geometry>
+        <mesh filename="package://wall_e_description/meshes/track-right.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+  </link>
+
+  <joint name="track_left_joint" type="fixed">
+    <parent link="drivetrain_left_link"/>
+    <child link="track_left_link"/>
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+  </joint>
+
+  <link name="track_left_link">
+    <visual>
+      <origin xyz="0.15 -0.15 -0.15" rpy="0.0 0.0 1.570796327"/> <!--TODO fix origin of mesh-->
+      <geometry>
+        <mesh filename="package://wall_e_description/meshes/track-left.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+  </link>
+
+  <joint name="wheel_right_joint" type="fixed"> <!--TODO make a continuous joint-->
+    <parent link="drivetrain_right_link"/>
+    <child link="wheel_right_link"/>
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> <!--TODO fix offset of link-->
+  </joint>
+
+  <link name="wheel_right_link">
+    <visual>
+      <origin xyz="0.15 -0.15 -0.15" rpy="0.0 0.0 1.570796327"/> <!--TODO fix origin of mesh-->
+      <geometry>
+        <mesh filename="package://wall_e_description/meshes/wheel-right.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+  </link>
+
+  <joint name="wheel_left_joint" type="fixed"> <!--TODO make a continuous joint-->
+    <parent link="drivetrain_left_link"/>
+    <child link="wheel_left_link"/>
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> <!--TODO fix offset of link-->
+  </joint>
+
+  <link name="wheel_left_link">
+    <visual>
+      <origin xyz="0.15 -0.15 -0.15" rpy="0.0 0.0 1.570796327"/> <!--TODO fix origin of mesh-->
+      <geometry>
+        <mesh filename="package://wall_e_description/meshes/wheel-left.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+  </link>
+
+  <joint name="arm_right_joint" type="fixed"> <!--TODO make a limited joint-->
+    <parent link="base_link"/>
+    <child link="arm_right_link"/>
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> <!--TODO fix offset of link-->
+  </joint>
+
+  <link name="arm_right_link">
+    <visual>
+      <origin xyz="0.15 -0.15 -0.15" rpy="0.0 0.0 1.570796327"/> <!--TODO fix origin of mesh-->
+      <geometry>
+        <mesh filename="package://wall_e_description/meshes/arm-right.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="yellow"/>
+    </visual>
+  </link>
+
+  <joint name="arm_left_joint" type="fixed"> <!--TODO make a limited joint-->
+    <parent link="base_link"/>
+    <child link="arm_left_link"/>
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> <!--TODO fix offset of link-->
+  </joint>
+
+  <link name="arm_left_link">
+    <visual>
+      <origin xyz="0.15 -0.15 -0.15" rpy="0.0 0.0 1.570796327"/> <!--TODO fix origin of mesh-->
+      <geometry>
+        <mesh filename="package://wall_e_description/meshes/arm-left.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="yellow"/>
+    </visual>
+  </link>
+
+  <joint name="hand_right_joint" type="fixed">
+    <parent link="arm_right_link"/>
+    <child link="hand_right_link"/>
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+  </joint>
+
+  <link name="hand_right_link">
+    <visual>
+      <origin xyz="0.15 -0.15 -0.15" rpy="0.0 0.0 1.570796327"/> <!--TODO fix origin of mesh-->
+      <geometry>
+        <mesh filename="package://wall_e_description/meshes/hand-right.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+  </link>
+
+  <joint name="hand_left_joint" type="fixed">
+    <parent link="arm_left_link"/>
+    <child link="hand_left_link"/>
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+  </joint>
+
+  <link name="hand_left_link">
+    <visual>
+      <origin xyz="0.15 -0.15 -0.15" rpy="0.0 0.0 1.570796327"/> <!--TODO fix origin of mesh-->
+      <geometry>
+        <mesh filename="package://wall_e_description/meshes/hand-left.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+  </link>
+
+  <joint name="neck_bottom_joint" type="fixed"> <!--TODO make a limited joint-->
+    <parent link="base_link"/>
+    <child link="neck_bottom_link"/>
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> <!--TODO fix offset of link-->
+  </joint>
+
+  <link name="neck_bottom_link">
+    <visual>
+      <origin xyz="0.15 -0.15 -0.15" rpy="0.0 0.0 1.570796327"/> <!--TODO fix origin of mesh-->
+      <geometry>
+        <mesh filename="package://wall_e_description/meshes/neck-bottom.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="yellow"/>
+    </visual>
+  </link>
+
+  <joint name="neck_top_joint" type="fixed"> <!--TODO make a limited joint-->
+    <parent link="neck_bottom_link"/>
+    <child link="neck_top_link"/>
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> <!--TODO fix offset of link-->
+  </joint>
+
+  <link name="neck_top_link">
+    <visual>
+      <origin xyz="0.15 -0.15 -0.15" rpy="0.0 0.0 1.570796327"/> <!--TODO fix origin of mesh-->
+      <geometry>
+        <mesh filename="package://wall_e_description/meshes/neck-top.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="yellow"/>
+    </visual>
+  </link>
+
+  <joint name="head_center_joint" type="fixed"> <!--TODO make a limited joint-->
+    <parent link="neck_top_link"/>
+    <child link="head_center_link"/>
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> <!--TODO fix offset of link-->
+  </joint>
+
+  <link name="head_center_link">
+    <visual>
+      <origin xyz="0.15 -0.15 -0.15" rpy="0.0 0.0 1.570796327"/> <!--TODO fix origin of mesh-->
+      <geometry>
+        <mesh filename="package://wall_e_description/meshes/head-center.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+  </link>
+
+  <joint name="eye_right_joint" type="fixed"> <!--TODO make a limited joint-->
+    <parent link="head_center_link"/>
+    <child link="eye_right_link"/>
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> <!--TODO fix offset of link-->
+  </joint>
+
+  <link name="eye_right_link">
+    <visual>
+      <origin xyz="0.15 -0.15 -0.15" rpy="0.0 0.0 1.570796327"/> <!--TODO fix origin of mesh-->
+      <geometry>
+        <mesh filename="package://wall_e_description/meshes/eye-right.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+  </link>
+
+  <joint name="eye_left_joint" type="fixed"> <!--TODO make a limited joint-->
+    <parent link="head_center_link"/>
+    <child link="eye_left_link"/>
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> <!--TODO fix offset of link-->
+  </joint>
+
+  <link name="eye_left_link">
+    <visual>
+      <origin xyz="0.15 -0.15 -0.15" rpy="0.0 0.0 1.570796327"/> <!--TODO fix origin of mesh-->
+      <geometry>
+        <mesh filename="package://wall_e_description/meshes/eye-left.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+  </link>
+
+</robot>

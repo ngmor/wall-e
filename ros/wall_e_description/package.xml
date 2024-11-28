@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>wall_e_control</name>
+  <name>wall_e_description</name>
   <version>0.0.0</version>
-  <description>Hardware control of the WALL-E robot</description>
+  <description>Robot description for WALL-E robot</description>
   <maintainer email="ngmorales97@gmail.com">Nick Morales</maintainer>
   <maintainer email="liz.mtzgr.00@gmail.com">Liz Metzger</maintainer>
   <license>Apache 2.0</license>
@@ -14,9 +14,9 @@
   <test_depend>ament_lint_common</test_depend>
 
   <exec_depend>ros2launch</exec_depend>
-  <exec_depend>ament_index_python</exec_depend>
-
-  <depend>wall_e_interfaces</depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>joint_state_publisher</exec_depend>
+  <exec_depend>rviz2</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
