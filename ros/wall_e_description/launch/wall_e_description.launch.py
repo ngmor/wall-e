@@ -16,7 +16,7 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, SetLaunchConfiguration, Shutdown
 from launch.substitutions import Command, TextSubstitution, \
     PathJoinSubstitution, LaunchConfiguration
-from launch.conditions import IfCondition
+from launch.conditions import IfCondition, LaunchConfigurationEquals
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 from launch_ros.descriptions import ParameterValue
@@ -41,10 +41,10 @@ def generate_launch_description():
             description='Selects config file to use for RVIZ'
         ),
         DeclareLaunchArgument(
-            name='jsp_enable',
-            default_value='true',
-            choices=['true', 'false'],
-            description='Selects whether or not to launch the joint state publisher.',
+            name='jsp_type',
+            default_value='gui',
+            choices=['gui', 'normal', 'none'],
+            description='Options for starting joint state publisher.',
         ),
         SetLaunchConfiguration(
             name='namespace',
@@ -75,10 +75,16 @@ def generate_launch_description():
             }],
         ),
         Node(
+            package='joint_state_publisher_gui',
+            executable='joint_state_publisher_gui',
+            namespace=LaunchConfiguration('namespace'),
+            condition=LaunchConfigurationEquals('jsp_type', 'gui'),
+        ),
+        Node(
             package='joint_state_publisher',
             executable='joint_state_publisher',
             namespace=LaunchConfiguration('namespace'),
-            condition=IfCondition(LaunchConfiguration('jsp_enable')),
+            condition=LaunchConfigurationEquals('jsp_type', 'normal'),
         ),
         Node(
             package='rviz2',

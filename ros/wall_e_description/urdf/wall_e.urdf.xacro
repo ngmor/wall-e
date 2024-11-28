@@ -20,7 +20,7 @@
   <joint name="base_joint" type="fixed">
     <parent link="base_footprint"/>
     <child link="base_link"/>
-    <origin xyz="0.0 0.0 0.138887" rpy="0.0 0.0 0.0"/> <!--TODO fix offset of link-->
+    <origin xyz="0.0 0.0 0.138887" rpy="0.0 0.0 0.0"/>
   </joint>
 
   <link name="base_link">
@@ -97,15 +97,16 @@
     </visual>
   </link>
 
-  <joint name="wheel_right_joint" type="fixed"> <!--TODO make a continuous joint-->
+  <joint name="wheel_right_joint" type="continuous">
     <parent link="drivetrain_right_link"/>
     <child link="wheel_right_link"/>
-    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> <!--TODO fix offset of link-->
+    <origin xyz="-0.049187 -0.1318 -0.103877" rpy="0.0 0.0 0.0"/>
+    <axis xyz="0 1 0"/>
   </joint>
 
   <link name="wheel_right_link">
     <visual>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> <!--TODO fix origin of mesh-->
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
       <geometry>
         <mesh filename="package://wall_e_description/meshes/wheel-right.stl" scale="0.001 0.001 0.001"/>
       </geometry>
@@ -113,15 +114,16 @@
     </visual>
   </link>
 
-  <joint name="wheel_left_joint" type="fixed"> <!--TODO make a continuous joint-->
+  <joint name="wheel_left_joint" type="continuous">
     <parent link="drivetrain_left_link"/>
     <child link="wheel_left_link"/>
-    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> <!--TODO fix offset of link-->
+    <origin xyz="-0.049187 0.1318 -0.103877" rpy="0.0 0.0 0.0"/>
+    <axis xyz="0 1 0"/>
   </joint>
 
   <link name="wheel_left_link">
     <visual>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> <!--TODO fix origin of mesh-->
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
       <geometry>
         <mesh filename="package://wall_e_description/meshes/wheel-left.stl" scale="0.001 0.001 0.001"/>
       </geometry>
@@ -129,15 +131,17 @@
     </visual>
   </link>
 
-  <joint name="arm_right_joint" type="fixed"> <!--TODO make a limited joint-->
+  <joint name="arm_right_joint" type="revolute">
     <parent link="base_link"/>
     <child link="arm_right_link"/>
-    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> <!--TODO fix offset of link-->
+    <origin xyz="-0.036105 -0.0725 0.045529" rpy="0.0 0.0 0.0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="1000.0" lower="-4.0" upper="0.7" velocity="1000.0"/> <!--TODO update for actual limits-->
   </joint>
 
   <link name="arm_right_link">
     <visual>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> <!--TODO fix origin of mesh-->
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
       <geometry>
         <mesh filename="package://wall_e_description/meshes/arm-right.stl" scale="0.001 0.001 0.001"/>
       </geometry>
@@ -145,15 +149,17 @@
     </visual>
   </link>
 
-  <joint name="arm_left_joint" type="fixed"> <!--TODO make a limited joint-->
+  <joint name="arm_left_joint" type="revolute">
     <parent link="base_link"/>
     <child link="arm_left_link"/>
-    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> <!--TODO fix offset of link-->
+    <origin xyz="-0.036105 0.07275 0.045547" rpy="0.0 0.0 0.0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="1000.0" lower="-4.0" upper="0.7" velocity="1000.0"/> <!--TODO update for actual limits-->
   </joint>
 
   <link name="arm_left_link">
     <visual>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> <!--TODO fix origin of mesh-->
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
       <geometry>
         <mesh filename="package://wall_e_description/meshes/arm-left.stl" scale="0.001 0.001 0.001"/>
       </geometry>
@@ -164,12 +170,12 @@
   <joint name="hand_right_joint" type="fixed">
     <parent link="arm_right_link"/>
     <child link="hand_right_link"/>
-    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    <origin xyz="0.135 -0.026 0.0" rpy="0.0 0.0 0.0"/>
   </joint>
 
   <link name="hand_right_link">
     <visual>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> <!--TODO fix origin of mesh-->
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
       <geometry>
         <mesh filename="package://wall_e_description/meshes/hand-right.stl" scale="0.001 0.001 0.001"/>
       </geometry>
@@ -180,12 +186,12 @@
   <joint name="hand_left_joint" type="fixed">
     <parent link="arm_left_link"/>
     <child link="hand_left_link"/>
-    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    <origin xyz="0.135 0.041 0.0" rpy="0.0 0.0 0.0"/>
   </joint>
 
   <link name="hand_left_link">
     <visual>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> <!--TODO fix origin of mesh-->
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
       <geometry>
         <mesh filename="package://wall_e_description/meshes/hand-left.stl" scale="0.001 0.001 0.001"/>
       </geometry>
@@ -193,15 +199,17 @@
     </visual>
   </link>
 
-  <joint name="neck_bottom_joint" type="fixed"> <!--TODO make a limited joint-->
+  <joint name="neck_bottom_joint" type="revolute">
     <parent link="base_link"/>
     <child link="neck_bottom_link"/>
-    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> <!--TODO fix offset of link-->
+    <origin xyz="-0.023342 0.0 0.080" rpy="0.0 0.0 0.0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="1000.0" lower="-0.5" upper="0.1" velocity="1000.0"/> <!--TODO update for actual limits-->
   </joint>
 
   <link name="neck_bottom_link">
     <visual>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> <!--TODO fix origin of mesh-->
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
       <geometry>
         <mesh filename="package://wall_e_description/meshes/neck-bottom.stl" scale="0.001 0.001 0.001"/>
       </geometry>
@@ -209,15 +217,17 @@
     </visual>
   </link>
 
-  <joint name="neck_top_joint" type="fixed"> <!--TODO make a limited joint-->
+  <joint name="neck_top_joint" type="revolute">
     <parent link="neck_bottom_link"/>
     <child link="neck_top_link"/>
-    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> <!--TODO fix offset of link-->
+    <origin xyz="0.059852 0.0 0.008848" rpy="0.0 0.0 0.0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="1000.0" lower="-0.2" upper="1.5" velocity="1000.0"/> <!--TODO update for actual limits-->
   </joint>
 
   <link name="neck_top_link">
     <visual>
-      <origin xyz="0. 0.0 0.0" rpy="0.0 0.0 0.0"/> <!--TODO fix origin of mesh-->
+      <origin xyz="0. 0.0 0.0" rpy="0.0 0.0 0.0"/>
       <geometry>
         <mesh filename="package://wall_e_description/meshes/neck-top.stl" scale="0.001 0.001 0.001"/>
       </geometry>
@@ -225,15 +235,16 @@
     </visual>
   </link>
 
-  <joint name="head_center_joint" type="fixed"> <!--TODO make a limited joint-->
+  <joint name="head_center_joint" type="continuous"> <!--TODO make a limited joint-->
     <parent link="neck_top_link"/>
     <child link="head_center_link"/>
-    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> <!--TODO fix offset of link-->
+    <origin xyz="-0.033445 0.0 0.053725" rpy="0.0 0.0 0.0"/>
+    <axis xyz="0 0 1"/>
   </joint>
 
   <link name="head_center_link">
     <visual>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> <!--TODO fix origin of mesh-->
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
       <geometry>
         <mesh filename="package://wall_e_description/meshes/head-center.stl" scale="0.001 0.001 0.001"/>
       </geometry>
@@ -241,15 +252,17 @@
     </visual>
   </link>
 
-  <joint name="eye_right_joint" type="fixed"> <!--TODO make a limited joint-->
+  <joint name="eye_right_joint" type="revolute">
     <parent link="head_center_link"/>
     <child link="eye_right_link"/>
-    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> <!--TODO fix offset of link-->
+    <origin xyz="0.075654 0.0 0.028992" rpy="0.0 0.0 0.0"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="1000.0" lower="-0.1" upper="0.3" velocity="1000.0"/> <!--TODO update for actual limits-->
   </joint>
 
   <link name="eye_right_link">
     <visual>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> <!--TODO fix origin of mesh-->
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
       <geometry>
         <mesh filename="package://wall_e_description/meshes/eye-right.stl" scale="0.001 0.001 0.001"/>
       </geometry>
@@ -257,15 +270,17 @@
     </visual>
   </link>
 
-  <joint name="eye_left_joint" type="fixed"> <!--TODO make a limited joint-->
+  <joint name="eye_left_joint" type="revolute">
     <parent link="head_center_link"/>
     <child link="eye_left_link"/>
-    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> <!--TODO fix offset of link-->
+    <origin xyz="0.075364 0.0 0.0289895" rpy="0.0 0.0 0.0"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="1000.0" lower="-0.3" upper="0.1" velocity="1000.0"/> <!--TODO update for actual limits-->
   </joint>
 
   <link name="eye_left_link">
     <visual>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> <!--TODO fix origin of mesh-->
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
       <geometry>
         <mesh filename="package://wall_e_description/meshes/eye-left.stl" scale="0.001 0.001 0.001"/>
       </geometry>
