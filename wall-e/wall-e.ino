@@ -30,6 +30,34 @@
 // -- -- -- -- -- -- -- -- -- -- -- -- -- --
 #define SERVO_ENABLE_PIN 10          // Servo shield output enable pin
 
+/**
+ * Drive motor control
+ * 
+ * Uncomment the below DRIVE_MOTORS define to use the Arduino motor shield
+ * to control the drive motors
+ */
+// #define DRIVE_MOTORS
+#ifdef DRIVE_MOTORS
+	#include "MotorController.hpp"
+	#define DIRECTION_L_PIN 12           // Motor direction pins
+	#define DIRECTION_R_PIN 13
+	#define PWM_SPEED_L_PIN  3           // Motor PWM pins
+	#define PWM_SPEED_R_PIN 11
+	#define BRAKE_L_PIN  9               // Motor brake pins
+	#define BRAKE_R_PIN  8
+
+	// Set up motor controller classes
+	MotorController motorL(DIRECTION_L_PIN, PWM_SPEED_L_PIN, BRAKE_L_PIN, false);
+	MotorController motorR(DIRECTION_R_PIN, PWM_SPEED_R_PIN, BRAKE_R_PIN, false);
+
+	/// Motor Control Variables
+	// -- -- -- -- -- -- -- -- -- -- -- -- -- --
+	int pwmspeed = 255;
+	int moveValue = 0;
+	int turnValue = 0;
+	int turnOffset = 0;
+	int motorDeadzone = 0;
+#endif /* DRIVE_MOTORS */
 
 /**
  * Battery level detection
@@ -133,13 +161,13 @@ int preset[][2] =  {{410,120},  // head rotation
 
 // Servo Control - Position, Velocity, Acceleration
 // -- -- -- -- -- -- -- -- -- -- -- -- -- --
-// Servo Pins:	     0,   1,   2,   3,   4,   5,   6
-// Joint Name:	  head,necT,necB,eyeR,eyeL,armL,armR
-float curpos[] = { 248, 560, 140, 475, 270, 250, 290};  // Current position (units)
-float setpos[] = { 248, 560, 140, 475, 270, 250, 290};  // Required position (units)
-float curvel[] = {   0,   0,   0,   0,   0,   0,   0};  // Current velocity (units/sec)
-float maxvel[] = { 500, 400, 500,2400,2400, 600, 600};  // Max Servo velocity (units/sec)
-float accell[] = { 350, 300, 480,1800,1800, 500, 500};  // Servo acceleration (units/sec^2)
+// Servo Pins:	     0,   1,   2,   3,   4,   5,   6,   -,   -
+// Joint Name:	  head,necT,necB,eyeR,eyeL,armL,armR,motL,motR
+float curpos[] = { 248, 560, 140, 475, 270, 250, 290, 180, 180};  // Current position (units)
+float setpos[] = { 248, 560, 140, 475, 270, 250, 290,   0,   0};  // Required position (units)
+float curvel[] = {   0,   0,   0,   0,   0,   0,   0,   0,   0};  // Current velocity (units/sec)
+float maxvel[] = { 500, 400, 500,2400,2400, 600, 600, 255, 255};  // Max Servo velocity (units/sec)
+float accell[] = { 350, 300, 480,1800,1800, 500, 500, 800, 800};  // Servo acceleration (units/sec^2)
 
 
 
@@ -249,6 +277,15 @@ void evaluateSerial() {
 
 	Serial.print(firstChar); Serial.println(number);
 
+	#ifdef DRIVE_MOTORS
+	// Motor Inputs and Offsets
+	// -- -- -- -- -- -- -- -- -- -- -- -- -- --
+	if      (firstChar == 'X' && number >= -100 && number <= 100) turnValue = int(number * 2.55);       // Left/right control
+	else if (firstChar == 'Y' && number >= -100 && number <= 100) moveValue = int(number * 2.55);       // Forward/reverse control
+	else if (firstChar == 'S' && number >= -100 && number <= 100) turnOffset = number;                  // Steering offset
+	else if (firstChar == 'O' && number >=    0 && number <= 250) motorDeadzone = int(number);          // Motor deadzone offset
+	#endif /* DRIVE_MOTORS */
+
 
 	// Animations
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -292,6 +329,37 @@ void evaluateSerial() {
 		queue.clear();
 		setpos[3] = int(number * 0.01 * (preset[3][1] - preset[3][0]) + preset[3][0]);
 	}
+
+
+	#ifdef DRIVE_MOTORS
+	// Manual Movements with WASD
+	// -- -- -- -- -- -- -- -- -- -- -- -- -- --
+	else if (firstChar == 'w') {		// Forward movement
+		moveValue = pwmspeed;
+		turnValue = 0;
+		setpos[0] = (preset[0][1] + preset[0][0]) / 2;
+	}
+	else if (firstChar == 'q') {		// Stop movement
+		moveValue = 0;
+		turnValue = 0;
+		setpos[0] = (preset[0][1] + preset[0][0]) / 2;
+	}
+	else if (firstChar == 's') {		// Backward movement
+		moveValue = -pwmspeed;
+		turnValue = 0;
+		setpos[0] = (preset[0][1] + preset[0][0]) / 2;
+	}
+	else if (firstChar == 'a') {		// Drive & look left
+		moveValue = 0;
+		turnValue = -pwmspeed;
+		setpos[0] = preset[0][0];
+	}
+	else if (firstChar == 'd') {   		// Drive & look right
+		moveValue = 0;
+		turnValue = pwmspeed;
+		setpos[0] = preset[0][1];
+	}
+	#endif /* DRIVE_MOTORS */
 
 
 	// Manual Eye Movements
@@ -524,6 +592,61 @@ void softStart(animation_t targetPos, int timeMs) {
 
 
 
+#ifdef DRIVE_MOTORS
+// -------------------------------------------------------------------
+/// Manage the movement of the main motors
+///
+/// @param  dt  Time in milliseconds since function was last called
+// -------------------------------------------------------------------
+
+void manageMotors(float dt) {
+
+	// Update Main Motor Values
+	setpos[NUMBER_OF_SERVOS] = moveValue - turnValue;
+	setpos[NUMBER_OF_SERVOS + 1] = moveValue + turnValue;
+
+	// Apply turn offset (motor trim) only when motors are active
+	if (setpos[NUMBER_OF_SERVOS] != 0) setpos[NUMBER_OF_SERVOS] -= turnOffset;
+	if (setpos[NUMBER_OF_SERVOS + 1] != 0) setpos[NUMBER_OF_SERVOS + 1] += turnOffset;
+
+	for (int i = NUMBER_OF_SERVOS; i < NUMBER_OF_SERVOS + 2; i++) {
+
+		float velError = setpos[i] - curvel[i];
+
+		// If velocity error is above the threshold
+		if (abs(velError) > CONTROLLER_THRESHOLD && (setpos[i] != -1)) {
+
+			// Determine whether to accelerate or decelerate
+			float acceleration = accell[i];
+			if (setpos[i] < curvel[i] && curvel[i] >= 0) acceleration = -accell[i];
+			else if (setpos[i] < curvel[i] && curvel[i] < 0) acceleration = -accell[i]; 
+			else if (setpos[i] > curvel[i] && curvel[i] < 0) acceleration = accell[i];
+
+			// Update the current velocity
+			float dV = acceleration * dt / 1000.0;
+			if (abs(dV) < abs(velError)) curvel[i] += dV;
+			else curvel[i] = setpos[i];
+		} else {
+			curvel[i] = setpos[i];
+		}
+
+		// Apply deadzone offset
+		if (curvel[i] > 0) curvel[i] += motorDeadzone;
+		else if (curvel[i] < 0) curvel[i] -= motorDeadzone; 
+
+		// Limit Velocity
+		if (curvel[i] > maxvel[i]) curvel[i] = maxvel[i];
+		if (curvel[i] < -maxvel[i]) curvel[i] = -maxvel[i];
+	}
+
+	// Update motor speeds
+	motorL.setSpeed(curvel[NUMBER_OF_SERVOS]);
+	motorR.setSpeed(curvel[NUMBER_OF_SERVOS+1]);
+}
+#endif /* DRIVE_MOTORS */
+
+
+
 // -------------------------------------------------------------------
 /// Battery level detection
 // -------------------------------------------------------------------
@@ -576,6 +699,9 @@ void loop() {
 		lastTime = newTime;
 
 		manageServos(dt);
+		#ifdef DRIVE_MOTORS
+			manageMotors(dt);
+		#endif /* DRIVE_MOTORS */
 	}
 
 
