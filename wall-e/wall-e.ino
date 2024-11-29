@@ -107,6 +107,8 @@
 #define NUMBER_OF_SERVOS 7        // Number of servo motors
 #define SERVO_UPDATE_TIME 10      // Time in milliseconds of how often to update servo and motor positions
 #define SERVO_OFF_TIME 6000       // Turn servo motors off after 6 seconds
+#define SERVO_FEEDBACK            // Uncomment to provide feedback of current servo position over serial
+#define SERVO_FEEDBACK_TIME 250   // Provide servo feedback every 0.25 seconds
 #define STATUS_CHECK_TIME 10000   // Time in milliseconds of how often to check robot status (eg. battery level)
 #define CONTROLLER_THRESHOLD 1    // The minimum error which the dynamics controller tries to achieve
 #define MAX_SERIAL_LENGTH 5       // Maximum number of characters that can be received
@@ -135,6 +137,7 @@ Queue <animation_t> queue(QUEUE_LENGTH, buffer);
 unsigned long lastTime = 0;
 unsigned long animeTimer = 0;
 unsigned long motorTimer = 0;
+unsigned long servoFeedbackTimer = 0;
 unsigned long statusTimer = 0;
 unsigned long updateTimer = 0;
 bool autoMode = false;
@@ -219,6 +222,7 @@ void setup() {
 	unsigned long now_us = micros();
 	updateTimer = now_ms;
 	statusTimer = now_ms;
+	servoFeedbackTimer = now_ms;
 	lastTime = now_us;
 }
 
@@ -557,6 +561,16 @@ void manageServos(float dt) {
 	}
 }
 
+#ifdef SERVO_FEEDBACK
+void sendServoFeedback() {
+
+	for (int i = 0; i < NUMBER_OF_SERVOS; i++) {
+		// Send current position of servo via serial
+		Serial.print(F("Servo_")); Serial.print(i); Serial.print(F("_")); Serial.println(curpos[i]);
+	}
+}
+#endif
+
 
 
 // -------------------------------------------------------------------
@@ -702,6 +716,15 @@ void loop() {
 		#ifdef DRIVE_MOTORS
 			manageMotors(dt);
 		#endif /* DRIVE_MOTORS */
+	}
+
+	// Provide servo feedback
+	// -- -- -- -- -- -- -- -- -- -- -- -- -- --
+	if (millis() - servoFeedbackTimer >= SERVO_FEEDBACK_TIME) {
+		servoFeedbackTimer = millis();
+		#ifdef SERVO_FEEDBACK
+			sendServoFeedback();
+		#endif /* SERVO_FEEDBACK */
 	}
 
 
