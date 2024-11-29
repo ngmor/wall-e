@@ -16,6 +16,11 @@ find_package(wall_e_interfaces REQUIRED)
 
 # Install
 
+# Python package
+ament_python_install_package(wall_e
+  PACKAGE_DIR wall_e
+)
+
 # Nodes
 
 # WALL-E audio node
