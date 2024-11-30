@@ -15,7 +15,82 @@ from threading import Event, Thread
 from serial import Serial
 import serial.tools.list_ports as list_ports
 import time
+from enum import Enum
 
+###############################################################
+#
+# Servo Mappings
+#
+###############################################################
+
+# Mapping from servo index to servo joint name
+SERVO_INDEX_TO_NAME = [
+    'head_center',
+    'neck_top',
+    'neck_bottom',
+    'eye_right',
+    'eye_left',
+    'arm_left',
+    'arm_right',
+]
+
+# Mapping from servo index to servo manual command
+SERVO_INDEX_TO_COMMAND = [
+    'G', # head_center
+    'T', # neck_top
+    'B', # neck_bottom
+    'U', # eye_right
+    'E', # eye_left
+    'L', # arm_left
+    'R', # arm_right
+]
+
+# Mapping from servo joint name to servo index
+SERVO_NAME_TO_INDEX = dict()
+
+for i, servo in enumerate(SERVO_INDEX_TO_NAME):
+    SERVO_NAME_TO_INDEX[servo] = i
+
+###############################################################
+#
+# Movement Mappings
+#
+###############################################################
+
+class EyeMovements(Enum):
+    NEUTRAL         = 0
+    SAD             = 1
+    LEFT_TILT       = 2
+    RIGHT_TILT      = 3
+
+EYE_MOVEMENT_TO_COMMAND = {
+    EyeMovements.NEUTRAL:       'k',
+    EyeMovements.SAD:           'i',
+    EyeMovements.LEFT_TILT:     'j',
+    EyeMovements.RIGHT_TILT:    'l',
+}
+
+class HeadMovements(Enum):
+    FORWARD     = 0
+    UP          = 1
+    DOWN        = 2
+
+HEAD_MOVEMENT_TO_COMMAND = {
+    HeadMovements.FORWARD:      'g',
+    HeadMovements.UP:           'f',
+    HeadMovements.DOWN:         'h',
+}
+
+class ArmMovements(Enum):
+    NEUTRAL             = 0
+    LEFT_LOW_RIGHT_HIGH = 1
+    LEFT_HIGH_RIGHT_LOW = 2
+
+ARM_MOVEMENT_TO_COMMAND = {
+    ArmMovements.NEUTRAL:               'm',
+    ArmMovements.LEFT_LOW_RIGHT_HIGH:   'b',
+    ArmMovements.LEFT_HIGH_RIGHT_LOW:   'n',
+}
 
 ###############################################################
 #
@@ -37,8 +112,15 @@ class ArduinoDevice:
         self.port_name: str = ""
         self.serial_port: Serial | None = None
         self.serial_thread: Thread | None = None
-        self.battery_level: str | None = None
+        self.battery_level: int | None = None
+        self.init_servo_positions()
         self.exit_flag.clear()
+
+    # ---------------------------------------------------------
+    def init_servo_positions(self):
+        """Init servo position list to default value"""
+
+        self.servo_positions: list[float] = [0.0] * len(SERVO_INDEX_TO_NAME)
 
     # ---------------------------------------------------------
     def __del__(self):
@@ -92,6 +174,7 @@ class ArduinoDevice:
         """
         try:
             self.battery_level = None
+            self.init_servo_positions()
 
             if self.serial_thread is not None:
                 self.exit_flag.set()
@@ -132,6 +215,135 @@ class ArduinoDevice:
         return success
 
     # ---------------------------------------------------------
+    def turn(self, speed: int) -> bool:
+        """
+        Send a turn command
+        :param speed: speed of command to set [-100, 100]
+        :return: True if port is open and message has been added to queue
+        """
+        return self.send_command(f'X{speed}')
+
+    # ---------------------------------------------------------
+    def move_linearly(self, speed: int) -> bool:
+        """
+        Send a linear move command
+        :param speed: speed of command to set [-100, 100]
+        :return: True if port is open and message has been added to queue
+        """
+        return self.send_command(f'Y{speed}')
+
+    # ---------------------------------------------------------
+    def set_turn_offset(self, val: int) -> bool:
+        """
+        Set the drive motor turn offset
+        :param val: value to set [-100, 100]
+        :return: True if port is open and message has been added to queue
+        """
+        return self.send_command(f'S{val}')
+
+    # ---------------------------------------------------------
+    def set_motor_deadzone(self, val: int) -> bool:
+        """
+        Set the drive motor deadzone
+        :param val: value to set [0, 250]
+        :return: True if port is open and message has been added to queue
+        """
+        return self.send_command(f'O{val}')
+
+    # ---------------------------------------------------------
+    def play_animation(self, number: int) -> bool:
+        """
+        Play animation by number
+        :param number: number of animation to play
+        :return: True if port is open and message has been added to queue
+        """
+        return self.send_command(f'A{number}')
+
+    # ---------------------------------------------------------
+    def activate_auto_servo_mode(self) -> bool:
+        """
+        Activate auto servo mode
+        :return: True if port is open and message has been added to queue
+        """
+        return self.send_command(f'M1')
+
+    # ---------------------------------------------------------
+    def deactivate_auto_servo_mode(self) -> bool:
+        """
+        Deactivate auto servo mode
+        :return: True if port is open and message has been added to queue
+        """
+        return self.send_command(f'M0')
+
+    # ---------------------------------------------------------
+    def move_servo_by_index(self, index: int, position: int) -> bool:
+        """
+        Send a manual servo command to a servo specified by index
+        :param index: index of servo to command
+        :param position: position to command servo to [0, 100]
+        :return: True if port is open and message has been added to queue
+        """
+        return self.send_command(f'{SERVO_INDEX_TO_COMMAND[index]}{position}')
+
+    # ---------------------------------------------------------
+    def move_servo_by_name(self, name: str, position: int) -> bool:
+        """
+        Send a manual servo command to a servo specified by name
+        :param name: name of servo to command
+        :param position: position to command servo to [0, 100]
+        :return: True if port is open and message has been added to queue
+        """
+        return self.move_servo_by_index(SERVO_NAME_TO_INDEX[name], position)
+
+    # ---------------------------------------------------------
+    def move_eyes(self, movement: EyeMovements | int) -> bool:
+        """
+        Send an eye movement command
+        :param movement: enumeration of desired movement
+        :return: True if port is open and message has been added to queue
+        """
+        if type(movement) is int:
+            try:
+                movement = EyeMovements(movement)
+            except Exception as ex:
+                print(f'EyeMovement interpretation error: {repr(ex)}')
+                return False
+
+        return self.send_command(f'{EYE_MOVEMENT_TO_COMMAND[movement]}0')
+
+    # ---------------------------------------------------------
+    def move_head(self, movement: HeadMovements | int) -> bool:
+        """
+        Send a head movement command
+        :param movement: enumeration of desired movement
+        :return: True if port is open and message has been added to queue
+        """
+        if type(movement) is int:
+            try:
+                movement = HeadMovements(movement)
+            except Exception as ex:
+                print(f'HeadMovement interpretation error: {repr(ex)}')
+                return False
+
+        return self.send_command(f'{HEAD_MOVEMENT_TO_COMMAND[movement]}0')
+
+    # ---------------------------------------------------------
+    def move_arms(self, movement: ArmMovements | int) -> bool:
+        """
+        Send an arm movement command
+        :param movement: enumeration of desired movement
+        :return: True if port is open and message has been added to queue
+        """
+        if type(movement) is int:
+            try:
+                movement = ArmMovements(movement)
+            except Exception as ex:
+                print(f'ArmMovement interpretation error: {repr(ex)}')
+                return False
+
+        return self.send_command(f'{ARM_MOVEMENT_TO_COMMAND[movement]}0')
+
+    # ---------------------------------------------------------
     def clear_queue(self):
         """
         Clear the serial send queue
@@ -140,12 +352,30 @@ class ArduinoDevice:
             self.queue.get()
 
     # ---------------------------------------------------------
-    def get_battery_level(self) -> str | None:
+    def get_battery_level(self) -> int | None:
         """
         Get the robot battery level
-        :return: The battery level as a string, or None
+        :return: The battery level as an integer, or None
         """
         return self.battery_level
+
+    # ---------------------------------------------------------
+    def get_servo_position_by_index(self, index: int) -> float:
+        """
+        Get the servo position of the servo with the associated index
+        :param index: The index of the servo in question
+        :return: the current position of the servo
+        """
+        return self.servo_positions[index]
+
+    # ---------------------------------------------------------
+    def get_servo_position_by_name(self, name: str) -> float:
+        """
+        Get the servo position of the servo with the associated name
+        :param name: The name of the servo in question
+        :return: the current position of the servo
+        """
+        return self.get_servo_position_by_index(SERVO_NAME_TO_INDEX[name])
 
     # ---------------------------------------------------------
     def __communication_thread(self):
@@ -188,11 +418,17 @@ class ArduinoDevice:
         :param dataString: String containing the serial message to be parsed
         """
         try:
+            # Servo position feedback
+            # Format "Servo_<INDEX>_<VALUE>"
+            if "Servo" in dataString:
+                dataList = dataString.split('_')
+                self.servo_positions[int(dataList[1])] = float(dataList[2])
             # Battery level message
-            if "Battery" in dataString:
+            # Format "Battery_<VALUE>"
+            elif "Battery" in dataString:
                 dataList = dataString.split('_')
                 if len(dataList) > 1 and dataList[1].isdigit():
-                    self.battery_level = dataList[1]
+                    self.battery_level = int(dataList[1])
 
         except Exception as ex:
             print(f'Error parsing message [{dataString}]: {repr(ex)}')
