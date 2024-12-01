@@ -20,7 +20,8 @@ import rclpy
 from rclpy.node import Node
 from rcl_interfaces.msg import ParameterDescriptor
 from std_srvs.srv import Trigger
-from wall_e_interfaces.msg import BatteryLevel, ServoPosition, ServoPositions, ArduinoStatus
+from wall_e_interfaces.msg import \
+    BatteryLevel, ServoPosition, ServoPositions, ArduinoStatus, DriveMotorSpeed
 from wall_e_interfaces.srv import \
     ArduinoIntCommand, PlayAnimation, MoveServo, \
     MoveEyes, MoveHead, MoveArms
@@ -61,6 +62,21 @@ class WALLEArduino(Node):
         self.drive_motors_enable = \
             self.get_parameter('drive_motors_enable').get_parameter_value().bool_value
 
+        # SUBSCRIBERS ----------------------------------------------------------------------
+        if self.drive_motors_enable:
+            self.sub_linear_speed = self.create_subscription(
+                DriveMotorSpeed,
+                'linear_speed',
+                self.sub_linear_speed_callback,
+                10
+            )
+            self.sub_turn_speed = self.create_subscription(
+                DriveMotorSpeed,
+                'turn_speed',
+                self.sub_turn_speed_callback,
+                10
+            )
+
         # PUBLISHERS ----------------------------------------------------------------------
         self.pub_arduino_status = self.create_publisher(ArduinoStatus, 'arduino_status', 10)
         self.pub_battery_level = self.create_publisher(BatteryLevel, 'battery_level', 10)
@@ -78,16 +94,6 @@ class WALLEArduino(Node):
             self.srv_disconnect_callback
         )
         if self.drive_motors_enable:
-            self.srv_move_linearly = self.create_service(
-                ArduinoIntCommand,
-                'move_linearly',
-                self.srv_move_linearly_callback
-            )
-            self.srv_turn = self.create_service(
-                ArduinoIntCommand,
-                'turn',
-                self.srv_turn_callback
-            )
             self.srv_set_turn_offset = self.create_service(
                 ArduinoIntCommand,
                 'set_turn_offset',
@@ -172,6 +178,24 @@ class WALLEArduino(Node):
 
         return success
 
+    # SUBSCRIBERS ----------------------------------------------------------------------
+    def sub_linear_speed_callback(self, msg: DriveMotorSpeed):
+        """Move drive motors linearly at the specified speed [-100, 100]."""
+
+        success = self.arduino.move_linearly(msg.speed)
+
+        if not success:
+            self.get_logger().error(f'Error commanding linear drive speed: {msg.speed}')
+
+    def sub_turn_speed_callback(self, msg: DriveMotorSpeed):
+        """Turn drive motors at the specified speed [-100, 100]."""
+
+        success = self.arduino.turn(msg.speed)
+
+        if not success:
+            self.get_logger().error(f'Error commanding turn speed: {msg.speed}')
+
+
     # SERVICE SERVERS ----------------------------------------------------------------------
     def srv_connect_callback(
         self,
@@ -192,28 +216,6 @@ class WALLEArduino(Node):
         """Disconnect from the Arduino as a response to a "disconnect" service call."""
 
         response.success = self.disconnect()
-
-        return response
-
-    def srv_move_linearly_callback(
-        self,
-        request: ArduinoIntCommand.Request,
-        response: ArduinoIntCommand.Response
-    ) -> ArduinoIntCommand.Response:
-        """Move drive motors linearly at the specified speed [-100, 100]."""
-
-        response.success = self.arduino.move_linearly(request.argument)
-
-        return response
-
-    def srv_turn_callback(
-        self,
-        request: ArduinoIntCommand.Request,
-        response: ArduinoIntCommand.Response
-    ) -> ArduinoIntCommand.Response:
-        """Turn drive motors at the specified speed [-100, 100]."""
-
-        response.success = self.arduino.turn(request.argument)
 
         return response
 
