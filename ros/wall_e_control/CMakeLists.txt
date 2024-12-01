@@ -29,6 +29,12 @@ install(PROGRAMS
   DESTINATION lib/${PROJECT_NAME}
 )
 
+# WALL-E arduino node
+install(PROGRAMS
+  src/nodes/wall_e_arduino.py RENAME wall_e_arduino
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 # Config files
 install(
   DIRECTORY config
