@@ -19,6 +19,7 @@ from wall_e import ArduinoDevice, SERVO_INDEX_TO_NAME
 import rclpy
 from rclpy.node import Node
 from rcl_interfaces.msg import ParameterDescriptor
+from std_srvs.srv import Trigger
 from wall_e_interfaces.msg import BatteryLevel, ServoPosition, ServoPositions
 
 class WALLEArduino(Node):
@@ -28,7 +29,7 @@ class WALLEArduino(Node):
 
         super().__init__('wall_e_arduino')
 
-        # PARAMETERS ---------------------------------------------------------------------------
+        # PARAMETERS ----------------------------------------------------------------------
         self.declare_parameter(
             'device',
             '',
@@ -48,11 +49,23 @@ class WALLEArduino(Node):
             )
         )
 
-        # PUBLISHERS ---------------------------------------------------------------------------
+        # PUBLISHERS ----------------------------------------------------------------------
         self.pub_battery_level = self.create_publisher(BatteryLevel, 'battery_level', 10)
         self.pub_servo_positions = self.create_publisher(ServoPositions, 'servo_positions', 10)
 
-        # TIMERS ---------------------------------------------------------------------------
+        # SERVICE SERVERS ----------------------------------------------------------------------
+        self.srv_connect = self.create_service(
+            Trigger,
+            'connect',
+            self.srv_connect_callback
+        )
+        self.srv_disconnect = self.create_service(
+            Trigger,
+            'disconnect',
+            self.srv_disconnect_callback
+        )
+
+        # TIMERS ----------------------------------------------------------------------
         self.tmr_status = self.create_timer(
             self.get_parameter('status_update_rate').get_parameter_value().double_value,
             self.tmr_status_callback
@@ -90,8 +103,33 @@ class WALLEArduino(Node):
 
         return success
 
-    # TIMERS ---------------------------------------------------------------------------
+    # SERVICE SERVERS ----------------------------------------------------------------------
+    def srv_connect_callback(
+        self,
+        request: Trigger.Request,
+        response: Trigger.Response
+    ) -> Trigger.Response:
+        """Connect to the Arduino as a response to a "connect" service call."""
+
+        response.success = self.connect()
+
+        return response
+
+    def srv_disconnect_callback(
+        self,
+        request: Trigger.Request,
+        response: Trigger.Response
+    ) -> Trigger.Response:
+        """Disconnect from the Arduino as a response to a "disconnect" service call."""
+
+        response.success = self.disconnect()
+
+        return response
+
+    # TIMERS ----------------------------------------------------------------------
     def tmr_status_callback(self):
+        """Update Arduino status and publish on corresponding topics."""
+
         if not self.arduino.is_connected():
             return
 
