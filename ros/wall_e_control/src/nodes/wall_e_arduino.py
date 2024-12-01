@@ -21,7 +21,7 @@ from rclpy.node import Node
 from rcl_interfaces.msg import ParameterDescriptor
 from std_srvs.srv import Trigger
 from wall_e_interfaces.msg import BatteryLevel, ServoPosition, ServoPositions, ArduinoStatus
-from wall_e_interfaces.srv import ArduinoIntCommand, PlayAnimation
+from wall_e_interfaces.srv import ArduinoIntCommand, PlayAnimation, MoveServo
 
 class WALLEArduino(Node):
 
@@ -111,6 +111,11 @@ class WALLEArduino(Node):
             'deactivate_auto_servo_mode',
             self.srv_deactivate_auto_servo_mode_callback
         )
+        self.srv_move_servo = self.create_service(
+            MoveServo,
+            'move_servo',
+            self.srv_move_servo_callback
+        )
 
         # TIMERS ----------------------------------------------------------------------
         self.tmr_status = self.create_timer(
@@ -195,7 +200,6 @@ class WALLEArduino(Node):
 
         return response
 
-
     def srv_set_turn_offset_callback(
         self,
         request: ArduinoIntCommand.Request,
@@ -206,7 +210,6 @@ class WALLEArduino(Node):
         response.success = self.arduino.set_turn_offset(request.argument)
 
         return response
-
 
     def srv_set_motor_deadzone_callback(
         self,
@@ -249,6 +252,32 @@ class WALLEArduino(Node):
         """Deactivate auto servo mode."""
 
         response.success = self.arduino.deactivate_auto_servo_mode()
+
+        return response
+
+    def srv_move_servo_callback(
+        self,
+        request: MoveServo.Request,
+        response: MoveServo.Response
+    ) -> MoveServo.Response:
+        """Manually move a specific servo."""
+
+        response.success = False
+
+        name_specified = request.name != ''
+        index_specified = request.index != -1
+
+        if not name_specified and not index_specified:
+            self.get_logger().error('Move servo command: servo not specified')
+        elif name_specified and index_specified:
+            self.get_logger().error(
+                'Move servo command: Too many arguments,'
+                + ' only specify servo by name OR index, not both'
+            )
+        elif name_specified:
+            response.success = self.arduino.move_servo_by_name(request.name, request.position)
+        elif index_specified:
+            response.success = self.arduino.move_servo_by_index(request.index, request.position)
 
         return response
 

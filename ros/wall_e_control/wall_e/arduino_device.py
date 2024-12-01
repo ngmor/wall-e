@@ -206,24 +206,30 @@ class ArduinoDevice:
         return self.send_command(f'M0')
 
     # ---------------------------------------------------------
-    def move_servo_by_index(self, index: int, position: int) -> bool:
+    def move_servo_by_index(self, index: int, position: float) -> bool:
         """
         Send a manual servo command to a servo specified by index
         :param index: index of servo to command
-        :param position: position to command servo to [0, 100]
+        :param position: position to command servo to (percentage of full range) [0.0, 1.0]
         :return: True if port is open and message has been added to queue
         """
-        return self.send_command(f'{SERVO_INDEX_TO_COMMAND[index]}{position}')
+        return self.send_command(f'{SERVO_INDEX_TO_COMMAND[index]}{int(100.0*position)}')
 
     # ---------------------------------------------------------
-    def move_servo_by_name(self, name: str, position: int) -> bool:
+    def move_servo_by_name(self, name: str, position: float) -> bool:
         """
         Send a manual servo command to a servo specified by name
         :param name: name of servo to command
-        :param position: position to command servo to [0, 100]
+        :param position: position to command servo to (percentage of full range) [0.0, 1.0]
         :return: True if port is open and message has been added to queue
         """
-        return self.move_servo_by_index(SERVO_NAME_TO_INDEX[name], position)
+        try:
+            index = SERVO_NAME_TO_INDEX[name]
+        except KeyError as ex:
+            print(f'{name} servo does not exist')
+            return False
+
+        return self.move_servo_by_index(index, position)
 
     # ---------------------------------------------------------
     def move_eyes(self, movement: EyeMovements | int) -> bool:
@@ -235,7 +241,7 @@ class ArduinoDevice:
         if type(movement) is int:
             try:
                 movement = EyeMovements(movement)
-            except Exception as ex:
+            except ValueError as ex:
                 print(f'EyeMovement interpretation error: {repr(ex)}')
                 return False
 
@@ -251,7 +257,7 @@ class ArduinoDevice:
         if type(movement) is int:
             try:
                 movement = HeadMovements(movement)
-            except Exception as ex:
+            except ValueError as ex:
                 print(f'HeadMovement interpretation error: {repr(ex)}')
                 return False
 
@@ -267,7 +273,7 @@ class ArduinoDevice:
         if type(movement) is int:
             try:
                 movement = ArmMovements(movement)
-            except Exception as ex:
+            except ValueError as ex:
                 print(f'ArmMovement interpretation error: {repr(ex)}')
                 return False
 

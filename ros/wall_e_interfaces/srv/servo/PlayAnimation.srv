@@ -15,5 +15,5 @@ int32 animation
 ---
 # RESPONSE -------------------------------------------------------------------------------------
 
-# Successfully queued command
+# Indicates whether command was queued successfully
 bool success
