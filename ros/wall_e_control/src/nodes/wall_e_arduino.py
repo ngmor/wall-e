@@ -21,7 +21,7 @@ from rclpy.node import Node
 from rcl_interfaces.msg import ParameterDescriptor
 from std_srvs.srv import Trigger
 from wall_e_interfaces.msg import BatteryLevel, ServoPosition, ServoPositions, ArduinoStatus
-from wall_e_interfaces.srv import ArduinoIntCommand
+from wall_e_interfaces.srv import ArduinoIntCommand, PlayAnimation
 
 class WALLEArduino(Node):
 
@@ -96,6 +96,11 @@ class WALLEArduino(Node):
                 'set_motor_deadzone',
                 self.srv_set_motor_deadzone_callback
             )
+        self.srv_play_animation = self.create_service(
+            PlayAnimation,
+            'play_animation',
+            self.srv_play_animation_callback
+        )
 
         # TIMERS ----------------------------------------------------------------------
         self.tmr_status = self.create_timer(
@@ -201,6 +206,17 @@ class WALLEArduino(Node):
         """Set the drive motor deadzone to the specified value."""
 
         response.success = self.arduino.set_motor_deadzone(request.argument)
+
+        return response
+
+    def srv_play_animation_callback(
+        self,
+        request: PlayAnimation.Request,
+        response: PlayAnimation.Response
+    ) -> PlayAnimation.Response:
+        """Play a servo animation by number."""
+
+        response.success = self.arduino.play_animation(request.animation)
 
         return response
 
