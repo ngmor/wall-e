@@ -50,7 +50,7 @@ class ArmMovements(Enum):
     LEFT_HIGH_RIGHT_LOW = 2
 
 ARM_MOVEMENT_TO_COMMAND = {
-    ArmMovements.NEUTRAL:               'm',
+    ArmMovements.NEUTRAL:               'n',
     ArmMovements.LEFT_LOW_RIGHT_HIGH:   'b',
-    ArmMovements.LEFT_HIGH_RIGHT_LOW:   'n',
+    ArmMovements.LEFT_HIGH_RIGHT_LOW:   'm',
 }

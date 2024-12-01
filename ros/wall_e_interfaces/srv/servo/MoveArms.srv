@@ -1,0 +1,19 @@
+#
+# Trigger a specific arm movement
+#
+
+# REQUEST -------------------------------------------------------------------------------------
+
+# Arm Movements
+int32 NEUTRAL=0
+int32 LEFT_LOW_RIGHT_HIGH=1
+int32 LEFT_HIGH_RIGHT_LOW=2
+
+# Arm movement to trigger (from enum above)
+int32 movement
+
+---
+# RESPONSE -------------------------------------------------------------------------------------
+
+# Indicates whether command was queued successfully
+bool success

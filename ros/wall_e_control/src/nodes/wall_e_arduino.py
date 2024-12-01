@@ -14,14 +14,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from wall_e import ArduinoDevice, SERVO_INDEX_TO_NAME
+from wall_e import ArduinoDevice, SERVO_INDEX_TO_NAME, EyeMovements, HeadMovements, ArmMovements
 
 import rclpy
 from rclpy.node import Node
 from rcl_interfaces.msg import ParameterDescriptor
 from std_srvs.srv import Trigger
 from wall_e_interfaces.msg import BatteryLevel, ServoPosition, ServoPositions, ArduinoStatus
-from wall_e_interfaces.srv import ArduinoIntCommand, PlayAnimation, MoveServo
+from wall_e_interfaces.srv import \
+    ArduinoIntCommand, PlayAnimation, MoveServo, \
+    MoveEyes, MoveHead, MoveArms
 
 class WALLEArduino(Node):
 
@@ -115,6 +117,21 @@ class WALLEArduino(Node):
             MoveServo,
             'move_servo',
             self.srv_move_servo_callback
+        )
+        self.srv_move_eyes = self.create_service(
+            MoveEyes,
+            'move_eyes',
+            self.srv_move_eyes_callback
+        )
+        self.srv_move_head = self.create_service(
+            MoveHead,
+            'move_head',
+            self.srv_move_head_callback
+        )
+        self.srv_move_arms = self.create_service(
+            MoveArms,
+            'move_arms',
+            self.srv_move_arms_callback
         )
 
         # TIMERS ----------------------------------------------------------------------
@@ -231,6 +248,11 @@ class WALLEArduino(Node):
 
         response.success = self.arduino.play_animation(request.animation)
 
+        if response.success:
+            self.get_logger().info(f'Successfully triggered animation {request.animation}')
+        else:
+            self.get_logger().info(f'Failed to trigger animation {request.animation}')
+
         return response
 
     def srv_activate_auto_servo_mode_callback(
@@ -242,6 +264,11 @@ class WALLEArduino(Node):
 
         response.success = self.arduino.activate_auto_servo_mode()
 
+        if response.success:
+            self.get_logger().info('Auto servo mode activated')
+        else:
+            self.get_logger().error('Failed to activate auto servo mode')
+
         return response
 
     def srv_deactivate_auto_servo_mode_callback(
@@ -250,6 +277,11 @@ class WALLEArduino(Node):
         response: Trigger.Response
     ) -> Trigger.Response:
         """Deactivate auto servo mode."""
+
+        if response.success:
+            self.get_logger().info('Auto servo mode deactivated')
+        else:
+            self.get_logger().error('Failed to deactivate auto servo mode')
 
         response.success = self.arduino.deactivate_auto_servo_mode()
 
@@ -278,6 +310,78 @@ class WALLEArduino(Node):
             response.success = self.arduino.move_servo_by_name(request.name, request.position)
         elif index_specified:
             response.success = self.arduino.move_servo_by_index(request.index, request.position)
+
+        return response
+
+    def srv_move_eyes_callback(
+        self,
+        request: MoveEyes.Request,
+        response: MoveEyes.Response
+    ) -> MoveEyes.Response:
+        """Trigger a specific eye movement."""
+
+        response.success = False
+
+        try:
+            movement = EyeMovements(request.movement)
+
+            response.success = self.arduino.move_eyes(movement)
+
+            if response.success:
+                self.get_logger().info(f'Successfully triggered {movement.name} eye movement')
+            else:
+                self.get_logger().info(f'Failed to trigger {movement.name} eye movement')
+
+        except ValueError as ex:
+            self.get_logger().error(f'Failed to interpret movement command: {ex}')
+
+        return response
+
+    def srv_move_head_callback(
+        self,
+        request: MoveHead.Request,
+        response: MoveHead.Response
+    ) -> MoveHead.Response:
+        """Trigger a specific head movement."""
+
+        response.success = False
+
+        try:
+            movement = HeadMovements(request.movement)
+
+            response.success = self.arduino.move_head(movement)
+
+            if response.success:
+                self.get_logger().info(f'Successfully triggered {movement.name} head movement')
+            else:
+                self.get_logger().info(f'Failed to trigger {movement.name} head movement')
+
+        except ValueError as ex:
+            self.get_logger().error(f'Failed to interpret movement command: {ex}')
+
+        return response
+
+    def srv_move_arms_callback(
+        self,
+        request: MoveArms.Request,
+        response: MoveArms.Response
+    ) -> MoveArms.Response:
+        """Trigger a specific arm movement."""
+
+        response.success = False
+
+        try:
+            movement = ArmMovements(request.movement)
+
+            response.success = self.arduino.move_arms(movement)
+
+            if response.success:
+                self.get_logger().info(f'Successfully triggered {movement.name} arm movement')
+            else:
+                self.get_logger().info(f'Failed to trigger {movement.name} arm movement')
+
+        except ValueError as ex:
+            self.get_logger().error(f'Failed to interpret movement command: {ex}')
 
         return response
 
