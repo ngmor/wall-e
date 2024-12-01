@@ -20,7 +20,7 @@ import rclpy
 from rclpy.node import Node
 from rcl_interfaces.msg import ParameterDescriptor
 from std_srvs.srv import Trigger
-from wall_e_interfaces.msg import BatteryLevel, ServoPosition, ServoPositions
+from wall_e_interfaces.msg import BatteryLevel, ServoPosition, ServoPositions, ArduinoStatus
 
 class WALLEArduino(Node):
 
@@ -50,6 +50,7 @@ class WALLEArduino(Node):
         )
 
         # PUBLISHERS ----------------------------------------------------------------------
+        self.pub_arduino_status = self.create_publisher(ArduinoStatus, 'arduino_status', 10)
         self.pub_battery_level = self.create_publisher(BatteryLevel, 'battery_level', 10)
         self.pub_servo_positions = self.create_publisher(ServoPositions, 'servo_positions', 10)
 
@@ -130,7 +131,11 @@ class WALLEArduino(Node):
     def tmr_status_callback(self):
         """Update Arduino status and publish on corresponding topics."""
 
-        if not self.arduino.is_connected():
+        is_connected = self.arduino.is_connected()
+
+        self.pub_arduino_status.publish(ArduinoStatus(is_connected=is_connected))
+
+        if not is_connected:
             return
 
         battery_level = self.arduino.get_battery_level()
