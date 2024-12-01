@@ -565,8 +565,13 @@ void manageServos(float dt) {
 void sendServoFeedback() {
 
 	for (int i = 0; i < NUMBER_OF_SERVOS; i++) {
+		// Calculate position as percentage of range
+		float low = preset[i][0];
+		float high = preset[i][1];
+		float position = (curpos[i] - low) / (high - low);
+
 		// Send current position of servo via serial
-		Serial.print(F("Servo_")); Serial.print(i); Serial.print(F("_")); Serial.println(curpos[i]);
+		Serial.print(F("Servo_")); Serial.print(i); Serial.print(F("_")); Serial.println(position);
 	}
 }
 #endif

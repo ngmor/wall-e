@@ -12,14 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .arduino_device import ArduinoDevice, \
-    SERVO_INDEX_TO_NAME, SERVO_NAME_TO_INDEX, \
-    EyeMovements, HeadMovements, ArmMovements
+from .arduino_device import ArduinoDevice
+from .servos import SERVO_INDEX_TO_NAME, SERVO_NAME_TO_INDEX, NUM_SERVOS
+from .movements import EyeMovements, HeadMovements, ArmMovements
 
 __all__ = [
     'ArduinoDevice',
     'SERVO_INDEX_TO_NAME',
     'SERVO_NAME_TO_INDEX',
+    'NUM_SERVOS',
     'EyeMovements',
     'HeadMovements',
     'ArmMovements',

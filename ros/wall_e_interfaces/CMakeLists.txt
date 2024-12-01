@@ -9,11 +9,11 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
-# file(GLOB_RECURSE MESSAGES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} msg/*) TODO add
+file(GLOB_RECURSE MESSAGES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} msg/*)
 file(GLOB_RECURSE SERVICES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} srv/*)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  # ${MESSAGES} TODO add
+  ${MESSAGES}
   ${SERVICES}
   # DEPENDENCIES
   # TODO add

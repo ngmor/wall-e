@@ -15,82 +15,12 @@ from threading import Event, Thread
 from serial import Serial
 import serial.tools.list_ports as list_ports
 import time
-from enum import Enum
 
-###############################################################
-#
-# Servo Mappings
-#
-###############################################################
-
-# Mapping from servo index to servo joint name
-SERVO_INDEX_TO_NAME = [
-    'head_center',
-    'neck_top',
-    'neck_bottom',
-    'eye_right',
-    'eye_left',
-    'arm_left',
-    'arm_right',
-]
-
-# Mapping from servo index to servo manual command
-SERVO_INDEX_TO_COMMAND = [
-    'G', # head_center
-    'T', # neck_top
-    'B', # neck_bottom
-    'U', # eye_right
-    'E', # eye_left
-    'L', # arm_left
-    'R', # arm_right
-]
-
-# Mapping from servo joint name to servo index
-SERVO_NAME_TO_INDEX = dict()
-
-for i, servo in enumerate(SERVO_INDEX_TO_NAME):
-    SERVO_NAME_TO_INDEX[servo] = i
-
-###############################################################
-#
-# Movement Mappings
-#
-###############################################################
-
-class EyeMovements(Enum):
-    NEUTRAL         = 0
-    SAD             = 1
-    LEFT_TILT       = 2
-    RIGHT_TILT      = 3
-
-EYE_MOVEMENT_TO_COMMAND = {
-    EyeMovements.NEUTRAL:       'k',
-    EyeMovements.SAD:           'i',
-    EyeMovements.LEFT_TILT:     'j',
-    EyeMovements.RIGHT_TILT:    'l',
-}
-
-class HeadMovements(Enum):
-    FORWARD     = 0
-    UP          = 1
-    DOWN        = 2
-
-HEAD_MOVEMENT_TO_COMMAND = {
-    HeadMovements.FORWARD:      'g',
-    HeadMovements.UP:           'f',
-    HeadMovements.DOWN:         'h',
-}
-
-class ArmMovements(Enum):
-    NEUTRAL             = 0
-    LEFT_LOW_RIGHT_HIGH = 1
-    LEFT_HIGH_RIGHT_LOW = 2
-
-ARM_MOVEMENT_TO_COMMAND = {
-    ArmMovements.NEUTRAL:               'm',
-    ArmMovements.LEFT_LOW_RIGHT_HIGH:   'b',
-    ArmMovements.LEFT_HIGH_RIGHT_LOW:   'n',
-}
+from .servos import SERVO_INDEX_TO_NAME, SERVO_NAME_TO_INDEX, SERVO_INDEX_TO_COMMAND
+from .movements import \
+    EyeMovements, EYE_MOVEMENT_TO_COMMAND, \
+    HeadMovements, HEAD_MOVEMENT_TO_COMMAND, \
+    ArmMovements, ARM_MOVEMENT_TO_COMMAND
 
 ###############################################################
 #
@@ -120,7 +50,7 @@ class ArduinoDevice:
     def init_servo_positions(self):
         """Init servo position list to default value"""
 
-        self.servo_positions: list[float] = [0.0] * len(SERVO_INDEX_TO_NAME)
+        self.servo_positions: list[float | None] = [None] * len(SERVO_INDEX_TO_NAME)
 
     # ---------------------------------------------------------
     def __del__(self):
@@ -359,8 +289,15 @@ class ArduinoDevice:
         """
         return self.battery_level
 
+    def get_servo_positions(self) -> list[float | None]:
+        """
+        Get full list of servo positions
+        :return: full list of servo positions
+        """
+        return self.servo_positions
+
     # ---------------------------------------------------------
-    def get_servo_position_by_index(self, index: int) -> float:
+    def get_servo_position_by_index(self, index: int) -> float | None:
         """
         Get the servo position of the servo with the associated index
         :param index: The index of the servo in question
@@ -369,7 +306,7 @@ class ArduinoDevice:
         return self.servo_positions[index]
 
     # ---------------------------------------------------------
-    def get_servo_position_by_name(self, name: str) -> float:
+    def get_servo_position_by_name(self, name: str) -> float | None:
         """
         Get the servo position of the servo with the associated name
         :param name: The name of the servo in question
@@ -427,8 +364,7 @@ class ArduinoDevice:
             # Format "Battery_<VALUE>"
             elif "Battery" in dataString:
                 dataList = dataString.split('_')
-                if len(dataList) > 1 and dataList[1].isdigit():
-                    self.battery_level = int(dataList[1])
+                self.battery_level = int(dataList[1])
 
         except Exception as ex:
             print(f'Error parsing message [{dataString}]: {repr(ex)}')

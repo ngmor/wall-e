@@ -14,11 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from wall_e import ArduinoDevice
+from wall_e import ArduinoDevice, SERVO_INDEX_TO_NAME
 
 import rclpy
 from rclpy.node import Node
 from rcl_interfaces.msg import ParameterDescriptor
+from wall_e_interfaces.msg import BatteryLevel, ServoPosition, ServoPositions
 
 class WALLEArduino(Node):
 
@@ -39,6 +40,23 @@ class WALLEArduino(Node):
         self.device = self.get_parameter('device').get_parameter_value().string_value
         if self.device == '':
             raise RuntimeError("No serial 'device' parameter provided, aborting")
+        self.declare_parameter(
+            'status_update_rate',
+            0.1,
+            ParameterDescriptor(
+                description='Rate at which status messages from Arduino are published'
+            )
+        )
+
+        # PUBLISHERS ---------------------------------------------------------------------------
+        self.pub_battery_level = self.create_publisher(BatteryLevel, 'battery_level', 10)
+        self.pub_servo_positions = self.create_publisher(ServoPositions, 'servo_positions', 10)
+
+        # TIMERS ---------------------------------------------------------------------------
+        self.tmr_status = self.create_timer(
+            self.get_parameter('status_update_rate').get_parameter_value().double_value,
+            self.tmr_status_callback
+        )
 
         # Init Arduino device and attempt to connect
         self.arduino = ArduinoDevice()
@@ -71,6 +89,31 @@ class WALLEArduino(Node):
                 self.get_logger().error(f'Failed to disconnect from Arduino on {self.device}')
 
         return success
+
+    # TIMERS ---------------------------------------------------------------------------
+    def tmr_status_callback(self):
+        if not self.arduino.is_connected():
+            return
+
+        battery_level = self.arduino.get_battery_level()
+
+        # only publish valid value has been received
+        if battery_level is not None:
+            self.pub_battery_level.publish(BatteryLevel(level=battery_level))
+
+        servo_pos = self.arduino.get_servo_positions()
+
+        # only publish if valid value has been received for all servos
+        if None not in servo_pos:
+            msg = ServoPositions()
+
+            for i in range(len(servo_pos)):
+                msg.servos.append(ServoPosition(
+                    name=SERVO_INDEX_TO_NAME[i],
+                    position=servo_pos[i]
+                ))
+
+            self.pub_servo_positions.publish(msg)
 
 
 
