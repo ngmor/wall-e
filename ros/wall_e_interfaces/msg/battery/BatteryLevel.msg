@@ -1,5 +1,5 @@
 #
-# WALL-E battery level
+# Battery level
 #
 
 # Battery level as a percentage

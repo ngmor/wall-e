@@ -1,5 +1,5 @@
 #
-# WALL-E servo positions as percentages of their movement range
+# Servo positions as percentages of their movement range
 #
 
 # Servo positions

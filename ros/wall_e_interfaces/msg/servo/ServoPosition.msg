@@ -1,5 +1,5 @@
 #
-# WALL-E servo position as percentage of servo movement range
+# Servo position as percentage of servo movement range
 #
 
 # Servo name

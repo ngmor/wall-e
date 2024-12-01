@@ -21,6 +21,7 @@ from rclpy.node import Node
 from rcl_interfaces.msg import ParameterDescriptor
 from std_srvs.srv import Trigger
 from wall_e_interfaces.msg import BatteryLevel, ServoPosition, ServoPositions, ArduinoStatus
+from wall_e_interfaces.srv import ArduinoIntCommand
 
 class WALLEArduino(Node):
 
@@ -48,6 +49,15 @@ class WALLEArduino(Node):
                 description='Rate at which status messages from Arduino are published'
             )
         )
+        self.declare_parameter(
+            'drive_motors_enable',
+            True,
+            ParameterDescriptor(
+                description='Enable drive motor control through Arduino (if a motor shield is used)'
+            )
+        )
+        self.drive_motors_enable = \
+            self.get_parameter('drive_motors_enable').get_parameter_value().bool_value
 
         # PUBLISHERS ----------------------------------------------------------------------
         self.pub_arduino_status = self.create_publisher(ArduinoStatus, 'arduino_status', 10)
@@ -65,6 +75,27 @@ class WALLEArduino(Node):
             'disconnect',
             self.srv_disconnect_callback
         )
+        if self.drive_motors_enable:
+            self.srv_move_linearly = self.create_service(
+                ArduinoIntCommand,
+                'move_linearly',
+                self.srv_move_linearly_callback
+            )
+            self.srv_turn = self.create_service(
+                ArduinoIntCommand,
+                'turn',
+                self.srv_turn_callback
+            )
+            self.srv_set_turn_offset = self.create_service(
+                ArduinoIntCommand,
+                'set_turn_offset',
+                self.srv_set_turn_offset_callback
+            )
+            self.srv_set_motor_deadzone = self.create_service(
+                ArduinoIntCommand,
+                'set_motor_deadzone',
+                self.srv_set_motor_deadzone_callback
+            )
 
         # TIMERS ----------------------------------------------------------------------
         self.tmr_status = self.create_timer(
@@ -124,6 +155,52 @@ class WALLEArduino(Node):
         """Disconnect from the Arduino as a response to a "disconnect" service call."""
 
         response.success = self.disconnect()
+
+        return response
+
+    def srv_move_linearly_callback(
+        self,
+        request: ArduinoIntCommand.Request,
+        response: ArduinoIntCommand.Response
+    ) -> ArduinoIntCommand.Response:
+        """Move drive motors linearly at the specified speed [-100, 100]."""
+
+        response.success = self.arduino.move_linearly(request.argument)
+
+        return response
+
+    def srv_turn_callback(
+        self,
+        request: ArduinoIntCommand.Request,
+        response: ArduinoIntCommand.Response
+    ) -> ArduinoIntCommand.Response:
+        """Turn drive motors at the specified speed [-100, 100]."""
+
+        response.success = self.arduino.turn(request.argument)
+
+        return response
+
+
+    def srv_set_turn_offset_callback(
+        self,
+        request: ArduinoIntCommand.Request,
+        response: ArduinoIntCommand.Response
+    ) -> ArduinoIntCommand.Response:
+        """Set the turn offset of the drive motors to the specified value."""
+
+        response.success = self.arduino.set_turn_offset(request.argument)
+
+        return response
+
+
+    def srv_set_motor_deadzone_callback(
+        self,
+        request: ArduinoIntCommand.Request,
+        response: ArduinoIntCommand.Response
+    ) -> ArduinoIntCommand.Response:
+        """Set the drive motor deadzone to the specified value."""
+
+        response.success = self.arduino.set_motor_deadzone(request.argument)
 
         return response
 

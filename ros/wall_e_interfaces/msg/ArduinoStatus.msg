@@ -1,5 +1,5 @@
 #
-# WALL-E general Arduino status
+# General Arduino status
 #
 
 # True if Arduino is connected over serial
