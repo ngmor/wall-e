@@ -101,6 +101,16 @@ class WALLEArduino(Node):
             'play_animation',
             self.srv_play_animation_callback
         )
+        self.srv_activate_auto_servo_mode = self.create_service(
+            Trigger,
+            'activate_auto_servo_mode',
+            self.srv_activate_auto_servo_mode_callback
+        )
+        self.srv_deactivate_auto_servo_mode = self.create_service(
+            Trigger,
+            'deactivate_auto_servo_mode',
+            self.srv_deactivate_auto_servo_mode_callback
+        )
 
         # TIMERS ----------------------------------------------------------------------
         self.tmr_status = self.create_timer(
@@ -217,6 +227,28 @@ class WALLEArduino(Node):
         """Play a servo animation by number."""
 
         response.success = self.arduino.play_animation(request.animation)
+
+        return response
+
+    def srv_activate_auto_servo_mode_callback(
+        self,
+        request: Trigger.Request,
+        response: Trigger.Response
+    ) -> Trigger.Response:
+        """Activate auto servo mode."""
+
+        response.success = self.arduino.activate_auto_servo_mode()
+
+        return response
+
+    def srv_deactivate_auto_servo_mode_callback(
+        self,
+        request: Trigger.Request,
+        response: Trigger.Response
+    ) -> Trigger.Response:
+        """Deactivate auto servo mode."""
+
+        response.success = self.arduino.deactivate_auto_servo_mode()
 
         return response
 
