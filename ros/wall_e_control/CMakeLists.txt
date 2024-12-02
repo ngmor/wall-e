@@ -10,17 +10,29 @@ find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
+find_package(std_srvs REQUIRED)
 find_package(wall_e_interfaces REQUIRED)
 
 # Build
 
 # Install
 
+# Python package
+ament_python_install_package(wall_e
+  PACKAGE_DIR wall_e
+)
+
 # Nodes
 
 # WALL-E audio node
 install(PROGRAMS
   src/nodes/wall_e_audio.py RENAME wall_e_audio
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+# WALL-E arduino node
+install(PROGRAMS
+  src/nodes/wall_e_arduino.py RENAME wall_e_arduino
   DESTINATION lib/${PROJECT_NAME}
 )
 

@@ -3,10 +3,23 @@
   <arg name="audio_config_file" default="$(find-pkg-share wall_e_control)/config/audio.yaml"
     description="File path of config file for the WALL-E audio node"
   />
+  <!-- TODO pick correct default -->
+  <arg name="arduino_device" default="/dev/ttyUSB0"
+    description="Serial device port for Arduino"
+  />
+  <arg name="roboclaw_enable" default="true"
+    description="Use RoboClaw motor controller instead of Arduino motor shield"
+  />
 
   <!-- Run audio node -->
   <node pkg="wall_e_control" exec="wall_e_audio" output="screen">
     <param from="$(var audio_config_file)"/>
+  </node>
+
+  <!-- Run Arduino node -->
+  <node pkg="wall_e_control" exec="wall_e_arduino" output="screen">
+    <param name="device" value="$(var arduino_device)"/>
+    <param name="drive_motors_enable" value="$(not $(var roboclaw_enable))"/>
   </node>
 
 </launch>

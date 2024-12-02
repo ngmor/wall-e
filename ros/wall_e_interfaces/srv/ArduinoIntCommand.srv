@@ -1,0 +1,14 @@
+#
+# Arduino command with an integer argument
+#
+
+# REQUEST -------------------------------------------------------------------------------------
+
+# Argument
+int32 argument
+
+---
+# RESPONSE -------------------------------------------------------------------------------------
+
+# Success of command
+bool success

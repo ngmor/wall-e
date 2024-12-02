@@ -1,0 +1,19 @@
+#
+# Trigger a specific head movement
+#
+
+# REQUEST -------------------------------------------------------------------------------------
+
+# Head Movements
+int32 FORWARD=0
+int32 UP=1
+int32 DOWN=2
+
+# Head movement to trigger (from enum above)
+int32 movement
+
+---
+# RESPONSE -------------------------------------------------------------------------------------
+
+# Indicates whether command was queued successfully
+bool success

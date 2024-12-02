@@ -1,0 +1,19 @@
+#
+# Play a servo animation by number
+#
+
+# REQUEST -------------------------------------------------------------------------------------
+
+# Default animations
+int32 RESET=0
+int32 BOOTUP_EYES=1
+int32 INQUISITIVE=2
+
+# Animation number to play
+int32 animation
+
+---
+# RESPONSE -------------------------------------------------------------------------------------
+
+# Indicates whether command was queued successfully
+bool success

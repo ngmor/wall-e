@@ -1,0 +1,20 @@
+#
+# Trigger a specific eye movement
+#
+
+# REQUEST -------------------------------------------------------------------------------------
+
+# Eye Movements
+int32 NEUTRAL=0
+int32 SAD=1
+int32 LEFT_TILT=2
+int32 RIGHT_TILT=3
+
+# Eye movement to trigger (from enum above)
+int32 movement
+
+---
+# RESPONSE -------------------------------------------------------------------------------------
+
+# Indicates whether command was queued successfully
+bool success
