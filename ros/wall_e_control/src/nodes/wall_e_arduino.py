@@ -316,12 +316,13 @@ class WALLEArduino(Node):
     ) -> Trigger.Response:
         """Deactivate auto servo mode."""
 
+        response.success = self.arduino.deactivate_auto_servo_mode()
+
         if response.success:
             self.get_logger().info('Auto servo mode deactivated')
         else:
             self.get_logger().error('Failed to deactivate auto servo mode')
 
-        response.success = self.arduino.deactivate_auto_servo_mode()
 
         return response
 
