@@ -44,14 +44,14 @@ class ArduinoDevice:
         self.port_name: str = ""
         self.serial_port: Serial | None = None
         self.serial_thread: Thread | None = None
-        self.battery_level: int | None = None
-        self.init_servo_positions()
+        self.init_feedback()
         self.exit_flag.clear()
 
     # ---------------------------------------------------------
-    def init_servo_positions(self):
-        """Init servo position list to default value"""
-
+    def init_feedback(self):
+        """Init feedback data to default values"""
+        self.pushbutton: bool | None = None
+        self.battery_level: int | None = None
         self.servo_positions: list[float | None] = [None] * len(SERVO_INDEX_TO_NAME)
 
     # ---------------------------------------------------------
@@ -105,8 +105,7 @@ class ArduinoDevice:
         :return: True if disconnected successfully, False otherwise
         """
         try:
-            self.battery_level = None
-            self.init_servo_positions()
+            self.init_feedback()
 
             if self.serial_thread is not None:
                 self.exit_flag.set()
@@ -291,6 +290,14 @@ class ArduinoDevice:
             self.queue.get()
 
     # ---------------------------------------------------------
+    def get_pushbutton(self) -> bool | None:
+        """
+        Get the current pushbutton value
+        :return: True if the pushbutton is pressed, false if not
+        """
+        return self.pushbutton
+
+    # ---------------------------------------------------------
     def get_battery_level(self) -> int | None:
         """
         Get the robot battery level
@@ -380,6 +387,11 @@ class ArduinoDevice:
             elif "Battery" in dataString:
                 dataList = dataString.split('_')
                 self.battery_level = int(dataList[1])
+            # Pushbutton message
+            # Format "Button_<VALUE>"
+            elif "Button" in dataString:
+                dataList = dataString.split('_')
+                self.pushbutton = bool(int(dataList[1]))
 
         except Exception as ex:
             print(f'Error parsing message [{dataString}]: {repr(ex)}')

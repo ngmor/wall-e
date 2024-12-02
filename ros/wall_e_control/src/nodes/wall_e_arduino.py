@@ -23,7 +23,7 @@ from rclpy.node import Node
 from rcl_interfaces.msg import ParameterDescriptor
 from std_srvs.srv import Trigger
 from wall_e_interfaces.msg import \
-    BatteryLevel, ServoPosition, ServoPositions, ArduinoStatus, DriveMotorSpeed
+    ArduinoStatus, ButtonStatus, BatteryLevel, ServoPosition, ServoPositions, DriveMotorSpeed
 from wall_e_interfaces.srv import \
     ArduinoIntCommand, PlayAnimation, MoveEyes, MoveHead, MoveArms
 
@@ -86,6 +86,7 @@ class WALLEArduino(Node):
 
         # PUBLISHERS ----------------------------------------------------------------------
         self.pub_arduino_status = self.create_publisher(ArduinoStatus, 'arduino_status', 10)
+        self.pub_button_status = self.create_publisher(ButtonStatus, 'button_status', 10)
         self.pub_battery_level = self.create_publisher(BatteryLevel, 'battery_level', 10)
         self.pub_servo_position_feedback = \
             self.create_publisher(ServoPositions, 'servo_position_feedback', 10)
@@ -409,11 +410,20 @@ class WALLEArduino(Node):
         if not is_connected:
             return
 
+
+        button_is_pressed = self.arduino.get_pushbutton()
+
+        # only publish if valid value has been received
+        if button_is_pressed is not None:
+            self.pub_button_status.publish(ButtonStatus(is_pressed=button_is_pressed))
+
+
         battery_level = self.arduino.get_battery_level()
 
-        # only publish valid value has been received
+        # only publish if valid value has been received
         if battery_level is not None:
             self.pub_battery_level.publish(BatteryLevel(level=battery_level))
+
 
         servo_pos = self.arduino.get_servo_positions()
 
