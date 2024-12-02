@@ -101,6 +101,16 @@
 	#endif /* OLED */
 #endif /* BAT_L */
 
+/**
+ * Pushbutton
+ * 
+ * Uncomment the PUSHBUTTON define to enable a pushbutton with events reported over serial
+ */
+#define PUSHBUTTON
+#ifdef PUSHBUTTON
+	#define PUSHBUTTON_PIN 4
+	#define PUSHBUTTON_DEBOUNCE_TIME 20 // milliseconds
+#endif /* PUSHBUTTON */
 
 /// Define other constants
 // -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -183,6 +193,9 @@ void setup() {
 	// Output Enable (EO) pin for the servo motors
 	pinMode(SERVO_ENABLE_PIN, OUTPUT);
 	digitalWrite(SERVO_ENABLE_PIN, HIGH);
+	#ifdef PUSHBUTTON
+		pinMode(PUSHBUTTON_PIN, INPUT_PULLUP);
+	#endif /* PUSHBUTTON */
 
 	// Communicate with servo shield (Analog servos run at ~60Hz)
 	pwm.begin();
@@ -688,6 +701,33 @@ void checkBatteryLevel() {
 }
 #endif
 
+// -------------------------------------------------------------------
+/// Pushbutton detection
+// -------------------------------------------------------------------
+
+#ifdef PUSHBUTTON
+void checkPushButton() {
+	static unsigned long debounceTime = millis();
+	static bool lastButtonValue = false;
+
+	bool buttonValue = digitalRead(PUSHBUTTON_PIN);
+
+	// Debounce button
+	if (buttonValue == lastButtonValue)
+	{
+		debounceTime = millis();
+	}
+	else if ((millis() - debounceTime) > PUSHBUTTON_DEBOUNCE_TIME)
+	{
+		// Button has changed state, report new state
+		// (invert because this is an input pullup)
+		Serial.print(F("Button_")); Serial.println(!buttonValue);
+		lastButtonValue = buttonValue;
+		debounceTime = millis();
+	}
+}
+#endif
+
 
 
 // -------------------------------------------------------------------
@@ -732,6 +772,11 @@ void loop() {
 		#endif /* SERVO_FEEDBACK */
 	}
 
+	// Check pushbutton
+	// -- -- -- -- -- -- -- -- -- -- -- -- -- --
+	#ifdef PUSHBUTTON
+		checkPushButton();
+	#endif /* PUSHBUTTON */
 
 	// Update robot status
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- --
