@@ -16,7 +16,7 @@ from serial import Serial
 import serial.tools.list_ports as list_ports
 import time
 
-from .servos import SERVO_INDEX_TO_NAME, SERVO_NAME_TO_INDEX, SERVO_INDEX_TO_COMMAND
+from .servos import SERVO_INDEX_TO_NAME, SERVO_NAME_TO_INDEX, SERVO_INDEX_TO_COMMAND, NUM_SERVOS
 from .movements import \
     EyeMovements, EYE_MOVEMENT_TO_COMMAND, \
     HeadMovements, HEAD_MOVEMENT_TO_COMMAND, \
@@ -213,6 +213,9 @@ class ArduinoDevice:
         :param position: position to command servo to (percentage of full range) [0.0, 1.0]
         :return: True if port is open and message has been added to queue
         """
+        if index >= NUM_SERVOS:
+            print(f'Servo index {index} out of range')
+            return False
         return self.send_command(f'{SERVO_INDEX_TO_COMMAND[index]}{int(100.0*position)}')
 
     # ---------------------------------------------------------

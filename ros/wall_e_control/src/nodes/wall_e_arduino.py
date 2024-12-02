@@ -23,8 +23,7 @@ from std_srvs.srv import Trigger
 from wall_e_interfaces.msg import \
     BatteryLevel, ServoPosition, ServoPositions, ArduinoStatus, DriveMotorSpeed
 from wall_e_interfaces.srv import \
-    ArduinoIntCommand, PlayAnimation, MoveServo, \
-    MoveEyes, MoveHead, MoveArms
+    ArduinoIntCommand, PlayAnimation, MoveEyes, MoveHead, MoveArms
 
 class WALLEArduino(Node):
 
@@ -76,11 +75,18 @@ class WALLEArduino(Node):
                 self.sub_turn_speed_callback,
                 10
             )
+        self.sub_servo_position_commands = self.create_subscription(
+            ServoPositions,
+            'servo_position_commands',
+            self.sub_servo_position_commands_callback,
+            10
+        )
 
         # PUBLISHERS ----------------------------------------------------------------------
         self.pub_arduino_status = self.create_publisher(ArduinoStatus, 'arduino_status', 10)
         self.pub_battery_level = self.create_publisher(BatteryLevel, 'battery_level', 10)
-        self.pub_servo_positions = self.create_publisher(ServoPositions, 'servo_positions', 10)
+        self.pub_servo_position_feedback = \
+            self.create_publisher(ServoPositions, 'servo_position_feedback', 10)
 
         # SERVICE SERVERS ----------------------------------------------------------------------
         self.srv_connect = self.create_service(
@@ -118,11 +124,6 @@ class WALLEArduino(Node):
             Trigger,
             'deactivate_auto_servo_mode',
             self.srv_deactivate_auto_servo_mode_callback
-        )
-        self.srv_move_servo = self.create_service(
-            MoveServo,
-            'move_servo',
-            self.srv_move_servo_callback
         )
         self.srv_move_eyes = self.create_service(
             MoveEyes,
@@ -194,6 +195,34 @@ class WALLEArduino(Node):
 
         if not success:
             self.get_logger().error(f'Error commanding turn speed: {msg.speed}')
+    
+    def sub_servo_position_commands_callback(self, msg: ServoPositions):
+        """Manually move servos as per positions received in message."""
+
+        for servo in msg.servos:
+            name_specified = servo.name != ''
+            index_specified = servo.index != -1
+
+            if not name_specified and not index_specified:
+                self.get_logger().error(
+                    'Servo position message received that contained an unspecified servo, skipping'
+                )
+                continue
+            elif name_specified and index_specified:
+                if SERVO_INDEX_TO_NAME[servo.index] != servo.name:
+                    self.get_logger().error(
+                        'Mismatch between received servo name'
+                        + f' ({servo.name}) and index ({servo.index}), skipping'
+                    )
+                    continue
+
+            if index_specified:
+                success = self.arduino.move_servo_by_index(servo.index, servo.position)
+            else:
+                success = self.arduino.move_servo_by_name(servo.name, servo.position)
+
+            if not success:
+                self.get_logger().error(f'Failed to move servo {servo.index}: {servo.name}')
 
 
     # SERVICE SERVERS ----------------------------------------------------------------------
@@ -286,32 +315,6 @@ class WALLEArduino(Node):
             self.get_logger().error('Failed to deactivate auto servo mode')
 
         response.success = self.arduino.deactivate_auto_servo_mode()
-
-        return response
-
-    def srv_move_servo_callback(
-        self,
-        request: MoveServo.Request,
-        response: MoveServo.Response
-    ) -> MoveServo.Response:
-        """Manually move a specific servo."""
-
-        response.success = False
-
-        name_specified = request.name != ''
-        index_specified = request.index != -1
-
-        if not name_specified and not index_specified:
-            self.get_logger().error('Move servo command: servo not specified')
-        elif name_specified and index_specified:
-            self.get_logger().error(
-                'Move servo command: Too many arguments,'
-                + ' only specify servo by name OR index, not both'
-            )
-        elif name_specified:
-            response.success = self.arduino.move_servo_by_name(request.name, request.position)
-        elif index_specified:
-            response.success = self.arduino.move_servo_by_index(request.index, request.position)
 
         return response
 
@@ -413,10 +416,11 @@ class WALLEArduino(Node):
             for i in range(len(servo_pos)):
                 msg.servos.append(ServoPosition(
                     name=SERVO_INDEX_TO_NAME[i],
+                    index=i,
                     position=servo_pos[i]
                 ))
 
-            self.pub_servo_positions.publish(msg)
+            self.pub_servo_position_feedback.publish(msg)
 
 
 
