@@ -13,7 +13,10 @@
 # limitations under the License.
 
 from .arduino_device import ArduinoDevice
-from .servos import SERVO_INDEX_TO_NAME, SERVO_NAME_TO_INDEX, NUM_SERVOS
+from .servos import \
+    SERVO_INDEX_TO_NAME, SERVO_NAME_TO_INDEX, NUM_SERVOS, \
+    servo_index_is_valid, servo_name_is_valid
+
 from .movements import EyeMovements, HeadMovements, ArmMovements
 
 __all__ = [
@@ -21,6 +24,8 @@ __all__ = [
     'SERVO_INDEX_TO_NAME',
     'SERVO_NAME_TO_INDEX',
     'NUM_SERVOS',
+    'servo_index_is_valid',
+    'servo_name_is_valid',
     'EyeMovements',
     'HeadMovements',
     'ArmMovements',

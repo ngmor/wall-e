@@ -14,7 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from wall_e import ArduinoDevice, SERVO_INDEX_TO_NAME, EyeMovements, HeadMovements, ArmMovements
+from wall_e import \
+    ArduinoDevice, SERVO_INDEX_TO_NAME, servo_index_is_valid, servo_name_is_valid, \
+    EyeMovements, HeadMovements, ArmMovements
 
 import rclpy
 from rclpy.node import Node
@@ -209,6 +211,11 @@ class WALLEArduino(Node):
                 )
                 continue
             elif name_specified and index_specified:
+                if not servo_index_is_valid(servo.index):
+                    self.get_logger().error(
+                        f'Invalid servo index received: {servo.index}: {servo.name}, skipping'
+                    )
+                    continue
                 if SERVO_INDEX_TO_NAME[servo.index] != servo.name:
                     self.get_logger().error(
                         'Mismatch between received servo name'

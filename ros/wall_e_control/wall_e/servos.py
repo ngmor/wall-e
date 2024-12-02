@@ -32,11 +32,19 @@ SERVO_INDEX_TO_NAME = [
 # Number of servos
 NUM_SERVOS = len(SERVO_INDEX_TO_NAME)
 
+def servo_index_is_valid(index: int) -> bool:
+    """Validate that a servo index is valid."""
+    return (index >= 0) and (index < NUM_SERVOS)
+
 # Mapping from servo joint name to servo index
 SERVO_NAME_TO_INDEX = dict()
 
 for i, servo in enumerate(SERVO_INDEX_TO_NAME):
     SERVO_NAME_TO_INDEX[servo] = i
+
+def servo_name_is_valid(name: str) -> bool:
+    """Validate that a servo name is valid."""
+    return name in SERVO_NAME_TO_INDEX.keys()
 
 # Mapping from servo index to servo manual command
 SERVO_INDEX_TO_COMMAND = [

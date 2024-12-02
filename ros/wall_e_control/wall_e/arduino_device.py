@@ -16,7 +16,9 @@ from serial import Serial
 import serial.tools.list_ports as list_ports
 import time
 
-from .servos import SERVO_INDEX_TO_NAME, SERVO_NAME_TO_INDEX, SERVO_INDEX_TO_COMMAND, NUM_SERVOS
+from .servos import \
+    SERVO_INDEX_TO_NAME, SERVO_NAME_TO_INDEX, SERVO_INDEX_TO_COMMAND, NUM_SERVOS, \
+    servo_index_is_valid, servo_name_is_valid
 from .movements import \
     EyeMovements, EYE_MOVEMENT_TO_COMMAND, \
     HeadMovements, HEAD_MOVEMENT_TO_COMMAND, \
@@ -213,7 +215,7 @@ class ArduinoDevice:
         :param position: position to command servo to (percentage of full range) [0.0, 1.0]
         :return: True if port is open and message has been added to queue
         """
-        if index >= NUM_SERVOS:
+        if not servo_index_is_valid(index):
             print(f'Servo index {index} out of range')
             return False
         return self.send_command(f'{SERVO_INDEX_TO_COMMAND[index]}{int(100.0*position)}')
@@ -226,13 +228,11 @@ class ArduinoDevice:
         :param position: position to command servo to (percentage of full range) [0.0, 1.0]
         :return: True if port is open and message has been added to queue
         """
-        try:
-            index = SERVO_NAME_TO_INDEX[name]
-        except KeyError as ex:
+        if not servo_name_is_valid(name):
             print(f'{name} servo does not exist')
             return False
 
-        return self.move_servo_by_index(index, position)
+        return self.move_servo_by_index(SERVO_NAME_TO_INDEX[name], position)
 
     # ---------------------------------------------------------
     def move_eyes(self, movement: EyeMovements | int) -> bool:
@@ -312,6 +312,9 @@ class ArduinoDevice:
         :param index: The index of the servo in question
         :return: the current position of the servo
         """
+        if not servo_index_is_valid(index):
+            print(f'Servo index {index} out of range')
+            return None
         return self.servo_positions[index]
 
     # ---------------------------------------------------------
@@ -321,6 +324,9 @@ class ArduinoDevice:
         :param name: The name of the servo in question
         :return: the current position of the servo
         """
+        if not servo_name_is_valid(name):
+            print(f'{name} servo does not exist')
+            return None
         return self.get_servo_position_by_index(SERVO_NAME_TO_INDEX[name])
 
     # ---------------------------------------------------------
