@@ -10,10 +10,39 @@ find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
+find_package(std_msgs REQUIRED) # TODO remove when roboclaw messages defined
 find_package(std_srvs REQUIRED)
+find_package(roboclaw_ros QUIET)
 find_package(wall_e_interfaces REQUIRED)
 
+# Logic to choose whether or not to use RoboClaw motor controller
+# Instead of Arduino motor shield
+# TODO document
+if(NOT DEFINED DISABLE_ROBOCLAW)
+  set(DISABLE_ROBOCLAW OFF)
+endif()
+
+if(${roboclaw_ros_FOUND} AND NOT ${DISABLE_ROBOCLAW})
+  set(USE_ROBOCLAW ON)
+else()
+  set(USE_ROBOCLAW OFF)
+endif()
+
+if(USE_ROBOCLAW)
+  add_compile_definitions(USE_ROBOCLAW)
+  set(roboclaw_ros_DEPENDENCY roboclaw_ros)
+endif()
+
 # Build
+
+# WALL-E kinematics node
+add_executable(wall_e_kinematics src/nodes/wall_e_kinematics.cpp)
+ament_target_dependencies(wall_e_kinematics
+  rclcpp
+  ${roboclaw_ros_DEPENDENCY}
+  std_msgs # TODO remove when roboclaw messages are defined
+  wall_e_interfaces
+)
 
 # Install
 
@@ -33,6 +62,12 @@ install(PROGRAMS
 # WALL-E arduino node
 install(PROGRAMS
   src/nodes/wall_e_arduino.py RENAME wall_e_arduino
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+# WALL-E C++ nodes
+install(TARGETS
+  wall_e_kinematics
   DESTINATION lib/${PROJECT_NAME}
 )
 
