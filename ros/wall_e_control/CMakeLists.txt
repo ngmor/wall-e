@@ -13,6 +13,7 @@ find_package(rclpy REQUIRED)
 find_package(std_msgs REQUIRED) # TODO remove when roboclaw messages defined
 find_package(std_srvs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 find_package(roboclaw_ros QUIET)
 find_package(wall_e_interfaces REQUIRED)
 
@@ -56,6 +57,16 @@ ament_target_dependencies(wall_e_kinematics
   wall_e_interfaces
 )
 
+# WALL-E joint state publisher node
+add_executable(wall_e_jsp src/nodes/wall_e_jsp.cpp)
+ament_target_dependencies(wall_e_jsp
+  rclcpp
+  ${roboclaw_ros_DEPENDENCY}
+  std_msgs # TODO remove when roboclaw messages are defined
+  sensor_msgs
+  wall_e_interfaces
+)
+
 # Install
 
 # Python package
@@ -80,6 +91,7 @@ install(PROGRAMS
 # WALL-E C++ nodes
 install(TARGETS
   wall_e_kinematics
+  wall_e_jsp
   DESTINATION lib/${PROJECT_NAME}
 )
 

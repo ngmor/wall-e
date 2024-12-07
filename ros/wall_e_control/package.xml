@@ -19,6 +19,7 @@
   <depend>std_msgs</depend> <!--TODO remove when roboclaw messages defined -->
   <depend>std_srvs</depend>
   <depend>geometry_msgs</depend>
+  <depend>sensor_msgs</depend>
   <depend>roboclaw_ros</depend>
   <depend>wall_e_interfaces</depend>
 

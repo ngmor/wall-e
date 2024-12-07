@@ -1,0 +1,25 @@
+/**:
+  ros__parameters:
+    servo:
+      limits:
+        head_center:
+          low: 0.0 # rad TODO fix with actual value
+          high: 6.28 # rad TODO fix with actual value
+        neck_top:
+          low: 0.0 # rad TODO fix with actual value
+          high: 6.28 # rad TODO fix with actual value
+        neck_bottom:
+          low: 0.0 # rad TODO fix with actual value
+          high: 6.28 # rad TODO fix with actual value
+        eye_right:
+          low: 0.0 # rad TODO fix with actual value
+          high: 6.28 # rad TODO fix with actual value
+        eye_left:
+          low: 0.0 # rad TODO fix with actual value
+          high: 6.28 # rad TODO fix with actual value
+        arm_left:
+          low: 0.0 # rad TODO fix with actual value
+          high: 6.28 # rad TODO fix with actual value
+        arm_right:
+          low: 0.0 # rad TODO fix with actual value
+          high: 6.28 # rad TODO fix with actual value

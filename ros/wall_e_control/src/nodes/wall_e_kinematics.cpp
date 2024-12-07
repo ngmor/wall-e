@@ -13,7 +13,7 @@
 // limitations under the License.
 
 /// @file
-/// @brief TODO
+/// @brief Differential drive kinematics control for the WALL-E robot
 
 #include <cmath>
 #include <algorithm>
@@ -146,7 +146,7 @@ public:
 
 private:
 
-  // PUBLISHERS --------------------------------------------------------------------------------
+  // SUBSCRIBERS --------------------------------------------------------------------------------
 
   /// @brief Receive commanded twists, convert them to wheel velocities via
   /// differential drive inverse kinematics, and publish them to wheel command topics
