@@ -35,8 +35,18 @@ endif()
 
 # Build
 
+# Kinematics library
+file(GLOB_RECURSE WALL_E_KINEMATICS_LIB_SRC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/kinematics/*)
+add_library(wall_e_kinematics_lib ${WALL_E_KINEMATICS_LIB_SRC})
+target_include_directories(wall_e_kinematics_lib
+  PUBLIC include
+)
+
 # WALL-E kinematics node
 add_executable(wall_e_kinematics src/nodes/wall_e_kinematics.cpp)
+target_link_libraries(wall_e_kinematics
+  wall_e_kinematics_lib
+)
 ament_target_dependencies(wall_e_kinematics
   rclcpp
   ${roboclaw_ros_DEPENDENCY}
