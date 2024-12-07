@@ -12,6 +12,7 @@ find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(std_msgs REQUIRED) # TODO remove when roboclaw messages defined
 find_package(std_srvs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(roboclaw_ros QUIET)
 find_package(wall_e_interfaces REQUIRED)
 
@@ -51,6 +52,7 @@ ament_target_dependencies(wall_e_kinematics
   rclcpp
   ${roboclaw_ros_DEPENDENCY}
   std_msgs # TODO remove when roboclaw messages are defined
+  geometry_msgs
   wall_e_interfaces
 )
 
