@@ -3,7 +3,7 @@ This allows us to set a unique identifier for a type of device whenever it's plu
 
 [99-wall-e.rules](99-wall-e.rules) is an example that worked for me to name the Arduino as `/dev/arduino` and the RoboClaw as `/dev/roboclaw`. Simply copy this into `/etc/udev/rules.d/` on the Raspberry Pi.
 
-If this doesn't work for you, follow the below steps to set up your own udev rules.
+If this doesn't work for you, follow the below steps to set up your own udev rules. See also [here](https://unix.stackexchange.com/questions/66901/how-to-bind-usb-device-under-a-static-name).
 
 # Creation
 
