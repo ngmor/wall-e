@@ -1,0 +1,5 @@
+/**:
+  ros__parameters:
+    track_width: 0.1 # TODO update with actual value
+    drive_radius: 0.1 # TODO update with actual value
+    motor_speed_max: 0.1 # TODO update with actual value

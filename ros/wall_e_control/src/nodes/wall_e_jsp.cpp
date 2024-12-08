@@ -164,7 +164,7 @@ public:
 
     // PUBLISHERS ------------------------------------------------------------
     pub_joint_states_ = create_publisher<sensor_msgs::msg::JointState>(
-      "/wall_e/joint_states",
+      "joint_states",
       rclcpp::QoS{10}
     );
 

@@ -1,0 +1,11 @@
+/**:
+  ros__parameters:
+    controllers:
+      drive:
+        address: 0x80
+        M1:
+          name: right
+          enc_counts_per_rev: 6400
+        M2:
+          name: left
+          enc_counts_per_rev: 6400

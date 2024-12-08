@@ -1,8 +1,5 @@
 <launch>
   <!-- Launch arguments -->
-  <arg name="audio_config_file" default="$(find-pkg-share wall_e_control)/config/audio.yaml"
-    description="File path of config file for the WALL-E audio node"
-  />
   <!-- TODO pick correct default -->
   <arg name="arduino_device" default="/dev/ttyUSB0"
     description="Serial device port for Arduino"
@@ -10,16 +7,63 @@
   <arg name="roboclaw_enable" default="true"
     description="Use RoboClaw motor controller instead of Arduino motor shield"
   />
-
-  <!-- Run audio node -->
-  <node pkg="wall_e_control" exec="wall_e_audio" output="screen">
-    <param from="$(var audio_config_file)"/>
-  </node>
+  <!-- TODO pick correct default -->
+  <arg name="roboclaw_device" default="/dev/ttyACM0"
+    if="$(var roboclaw_enable)"
+    description="Serial device port for RoboClaw"
+  />
+  <arg name="roboclaw_config_file" default="$(find-pkg-share wall_e_control)/config/roboclaw.yaml"
+    if="$(var roboclaw_enable)"
+    description="File path of config file for the RoboClaw node"
+  />
+  <arg name="servo_config_file" default="$(find-pkg-share wall_e_control)/config/servo.yaml"
+    description="File path of config file for the WALL-E servos"
+  />
+  <arg name="audio_config_file" default="$(find-pkg-share wall_e_control)/config/audio.yaml"
+    description="File path of config file for the WALL-E audio node"
+  />
+  <arg name="kinematics_config_file" default="$(find-pkg-share wall_e_control)/config/kinematics.yaml"
+    description="File path of config file for the WALL-E kinematics node"
+  />
+  <arg name="rviz_enable" default="false"
+    description="Enable visualization through RVIZ"
+  />
+  <arg name="rviz_config_file" default="$(find-pkg-share wall_e_description)/config/wall_e.rviz"
+    description="File path of config file for RVIZ"
+  />
 
   <!-- Run Arduino node -->
   <node pkg="wall_e_control" exec="wall_e_arduino" output="screen">
     <param name="device" value="$(var arduino_device)"/>
     <param name="drive_motors_enable" value="$(not $(var roboclaw_enable))"/>
   </node>
+
+  <!-- Run RoboClaw node -->
+  <node pkg="roboclaw_ros" exec="roboclaw_controller" output="screen" if="$(var roboclaw_enable)">
+    <param from="$(var roboclaw_config_file)"/>
+    <param name="device" value="$(var roboclaw_device)"/>
+  </node>
+
+  <!-- Run audio node -->
+  <node pkg="wall_e_control" exec="wall_e_audio" output="screen">
+    <param from="$(var audio_config_file)"/>
+  </node>
+
+  <!-- Run kinematics controller node -->
+  <node pkg="wall_e_control" exec="wall_e_kinematics" output="screen">
+    <param from="$(var kinematics_config_file)"/>
+  </node>
+
+  <!-- Run the joint state publisher node -->
+  <node pkg="wall_e_control" exec="wall_e_jsp" output="screen">
+    <param from="$(var servo_config_file)"/>
+  </node>
+
+  <!-- Launch the robot description -->
+  <include file="$(find-pkg-share wall_e_description)/launch/wall_e_description.launch.py">
+    <arg name="rviz_enable" value="$(var rviz_enable)"/>
+    <arg name="rviz_config_file" value="$(var rviz_config_file)"/>
+    <arg name="jsp_type" value="none"/>
+  </include>
 
 </launch>
