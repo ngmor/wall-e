@@ -1,14 +1,12 @@
 <launch>
   <!-- Launch arguments -->
-  <!-- TODO pick correct default -->
-  <arg name="arduino_device" default="/dev/ttyUSB0"
+  <arg name="arduino_device" default="/dev/arduino"
     description="Serial device port for Arduino"
   />
   <arg name="roboclaw_enable" default="true"
     description="Use RoboClaw motor controller instead of Arduino motor shield"
   />
-  <!-- TODO pick correct default -->
-  <arg name="roboclaw_device" default="/dev/ttyACM0"
+  <arg name="roboclaw_device" default="/dev/roboclaw"
     if="$(var roboclaw_enable)"
     description="Serial device port for RoboClaw"
   />
