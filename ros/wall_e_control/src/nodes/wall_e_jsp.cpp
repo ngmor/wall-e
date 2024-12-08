@@ -23,6 +23,7 @@
 #include <rclcpp/rclcpp.hpp>
 
 #include <sensor_msgs/msg/joint_state.hpp>
+#include <wall_e_interfaces/msg/servo_positions.hpp>
 
 // Motor controller specific includes
 #ifdef USE_ROBOCLAW
@@ -73,7 +74,7 @@ private:
     /// @param percentage servo position as a percentage along its limits,
     /// from 0.0 (0%) to 1.0 (100%)
     /// @return servo position in radians
-    double percentage_to_position(double percentage) const
+    double percentage_to_rad(double percentage) const
     {
       return percentage*range_ + low_;
     }
@@ -82,6 +83,8 @@ private:
   // CLASS MEMBERS --------------------------------------------------------------------------------
 
   // ROS objects
+  rclcpp::Subscription<wall_e_interfaces::msg::ServoPositions>::SharedPtr
+    sub_servo_position_feedback_ = nullptr;
   rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr pub_joint_states_;
 
   /// @brief map between servo name and servo limits class
@@ -143,7 +146,15 @@ public:
 
 
     // SUBSCRIBERS ------------------------------------------------------------
-    // TODO
+    sub_servo_position_feedback_ = create_subscription<wall_e_interfaces::msg::ServoPositions>(
+      "servo_position_feedback",
+      rclcpp::QoS{10},
+      std::bind(
+        &WALLEJointStatePublisher::sub_servo_position_feedback_callback,
+        this,
+        std::placeholders::_1
+      )
+    );
 
     // PUBLISHERS ------------------------------------------------------------
     pub_joint_states_ = create_publisher<sensor_msgs::msg::JointState>(
@@ -162,6 +173,33 @@ public:
   }
 
 private:
+
+  // SUBSCRIBERS --------------------------------------------------------------------------------
+
+  void sub_servo_position_feedback_callback(const wall_e_interfaces::msg::ServoPositions& msg)
+  {
+    sensor_msgs::msg::JointState joint_states;
+
+    // might be better for this to be included in the ServoPositions message,
+    // but not critical
+    joint_states.header.stamp = get_clock()->now();
+
+    joint_states.name.reserve(msg.servos.size());
+    joint_states.position.reserve(msg.servos.size());
+
+    for (const auto& servo: msg.servos)
+    {
+      joint_states.name.push_back(servo.name + "_joint");
+
+      // Convert joint positions as percentage to radians and store
+      joint_states.position.push_back(
+        servo_limits_.at(servo.name).percentage_to_rad(servo.position)
+      );
+    }
+
+    // Publish servo joint states
+    pub_joint_states_->publish(joint_states);
+  }
 
 };
 
