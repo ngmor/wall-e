@@ -92,7 +92,8 @@ private:
 
   // Motor controller specific members
 #ifdef USE_ROBOCLAW
-  // TODO
+  rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr sub_wheel_left_ = nullptr; // TODO fix when roboclaw messages are defined
+  rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr sub_wheel_right_ = nullptr; // TODO fix when roboclaw messages are defined
 #else
   // TODO
 #endif
@@ -164,7 +165,24 @@ public:
 
     // MOTOR CONTROLLER SPECIFIC INITS ------------------------------------------------------------
   #ifdef USE_ROBOCLAW
-    // TODO
+    sub_wheel_left_ = create_subscription<std_msgs::msg::Empty>( // TODO fix when roboclaw messages are defined
+      "drive/left/feedback",
+      rclcpp::QoS{10},
+      // TODO fix when roboclaw messages are defined
+      [this](const std_msgs::msg::Empty& msg)
+      {
+        sub_wheel_callback("wheel_left_joint", msg);
+      }
+    );
+    sub_wheel_right_ = create_subscription<std_msgs::msg::Empty>( // TODO fix when roboclaw messages are defined
+      "drive/right/feedback",
+      rclcpp::QoS{10},
+      // TODO fix when roboclaw messages are defined
+      [this](const std_msgs::msg::Empty& msg)
+      {
+        sub_wheel_callback("wheel_right_joint", msg);
+      }
+    );
   #else
     // TODO
   #endif
@@ -176,14 +194,12 @@ private:
 
   // SUBSCRIBERS --------------------------------------------------------------------------------
 
+  /// @brief Receive servo position messages and convert them to actual units (i.e. radians)
+  /// along the range of the servos, then publish joint state messages
   void sub_servo_position_feedback_callback(const wall_e_interfaces::msg::ServoPositions& msg)
   {
     sensor_msgs::msg::JointState joint_states;
-
-    // might be better for this to be included in the ServoPositions message,
-    // but not critical
-    joint_states.header.stamp = get_clock()->now();
-
+    joint_states.header.stamp = msg.stamp;
     joint_states.name.reserve(msg.servos.size());
     joint_states.position.reserve(msg.servos.size());
 
@@ -200,6 +216,26 @@ private:
     // Publish servo joint states
     pub_joint_states_->publish(joint_states);
   }
+
+#ifdef USE_ROBOCLAW
+  /// @brief Receive a wheel feedback message and convert it to a joint state to send out
+  /// @param joint_name the name of the joint
+  /// @param msg msg to convert
+  void sub_wheel_callback(const std::string& joint_name, const std_msgs::msg::Empty& msg)
+  {
+    // Convert feedback to joint state
+    sensor_msgs::msg::JointState joint_state;
+    joint_state.header.stamp = get_clock()->now(); // TODO get timestamp from message when roboclaw messages are defined
+    joint_state.name.push_back(joint_name);
+    joint_state.position.push_back(0.0); // TODO get position from message when roboclaw messages are defined
+    joint_state.velocity.push_back(0.0); // TODO get velocity from message when roboclaw messages are defined
+
+    // Publish wheel joint state
+    pub_joint_states_->publish(joint_state);
+  }
+#else
+  // TODO
+#endif
 
 };
 

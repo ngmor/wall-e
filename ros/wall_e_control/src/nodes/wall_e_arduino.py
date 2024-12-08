@@ -431,6 +431,8 @@ class WALLEArduino(Node):
         if None not in servo_pos:
             msg = ServoPositions()
 
+            msg.stamp = self.get_clock().now()
+
             for i in range(len(servo_pos)):
                 msg.servos.append(ServoPosition(
                     name=SERVO_INDEX_TO_NAME[i],
