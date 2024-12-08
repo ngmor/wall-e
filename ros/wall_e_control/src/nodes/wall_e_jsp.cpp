@@ -41,6 +41,11 @@ const std::vector<std::string> SERVO_NAMES = {
   "arm_right",
 };
 
+const std::string WHEEL_LEFT_JOINT = "wheel_left_joint";
+const std::string WHEEL_RIGHT_JOINT = "wheel_right_joint";
+
+using namespace std::chrono_literals;
+
 class WALLEJointStatePublisher : public rclcpp::Node
 {
 private:
@@ -95,7 +100,7 @@ private:
   rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr sub_wheel_left_ = nullptr; // TODO fix when roboclaw messages are defined
   rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr sub_wheel_right_ = nullptr; // TODO fix when roboclaw messages are defined
 #else
-  // TODO
+  rclcpp::TimerBase::SharedPtr tmr_wheel_dummy_ = nullptr;
 #endif
 
 public:
@@ -171,7 +176,7 @@ public:
       // TODO fix when roboclaw messages are defined
       [this](const std_msgs::msg::Empty& msg)
       {
-        sub_wheel_callback("wheel_left_joint", msg);
+        sub_wheel_callback(WHEEL_LEFT_JOINT, msg);
       }
     );
     sub_wheel_right_ = create_subscription<std_msgs::msg::Empty>( // TODO fix when roboclaw messages are defined
@@ -180,11 +185,16 @@ public:
       // TODO fix when roboclaw messages are defined
       [this](const std_msgs::msg::Empty& msg)
       {
-        sub_wheel_callback("wheel_right_joint", msg);
+        sub_wheel_callback(WHEEL_RIGHT_JOINT, msg);
       }
     );
   #else
-    // TODO
+    // When using the Arduino motor shield, no drive motor feedback is reported, so dummy
+    // joint states are published instead
+    tmr_wheel_dummy_ = create_wall_timer(
+      0.1s,
+      std::bind(&WALLEJointStatePublisher::tmr_wheel_dummy_callback, this)
+    );
   #endif
 
     RCLCPP_INFO_STREAM(get_logger(), get_fully_qualified_name() << " node started");
@@ -234,7 +244,20 @@ private:
     pub_joint_states_->publish(joint_state);
   }
 #else
-  // TODO
+  void tmr_wheel_dummy_callback()
+  {
+    // Create dummy wheel joint states
+    sensor_msgs::msg::JointState joint_states;
+    joint_states.name.push_back(WHEEL_LEFT_JOINT);
+    joint_states.position.push_back(0.0);
+    joint_states.velocity.push_back(0.0);
+    joint_states.name.push_back(WHEEL_RIGHT_JOINT);
+    joint_states.position.push_back(0.0);
+    joint_states.velocity.push_back(0.0);
+
+    // Publish wheel joint states
+    pub_joint_states_->publish(joint_states);
+  }
 #endif
 
 };
