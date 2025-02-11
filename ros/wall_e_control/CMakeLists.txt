@@ -14,7 +14,7 @@ find_package(std_msgs REQUIRED) # TODO remove when roboclaw messages defined
 find_package(std_srvs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
-find_package(roboclaw_ros QUIET)
+find_package(roboclaw_interfaces QUIET)
 find_package(wall_e_interfaces REQUIRED)
 
 # Logic to choose whether or not to use RoboClaw motor controller
@@ -24,15 +24,18 @@ if(NOT DEFINED DISABLE_ROBOCLAW)
   set(DISABLE_ROBOCLAW OFF)
 endif()
 
-if(${roboclaw_ros_FOUND} AND NOT ${DISABLE_ROBOCLAW})
+if(${roboclaw_interfaces_FOUND} AND NOT ${DISABLE_ROBOCLAW})
   set(USE_ROBOCLAW ON)
 else()
   set(USE_ROBOCLAW OFF)
 endif()
 
 if(USE_ROBOCLAW)
+  message(STATUS "Building with RoboClaw interfaces for drive motors")
   add_compile_definitions(USE_ROBOCLAW)
-  set(roboclaw_ros_DEPENDENCY roboclaw_ros)
+  set(roboclaw_DEPENDENCY roboclaw_interfaces)
+else()
+  message(STATUS "Building with default Arduino interfaces for driver motors")
 endif()
 
 # Build
@@ -51,7 +54,7 @@ target_link_libraries(wall_e_kinematics
 )
 ament_target_dependencies(wall_e_kinematics
   rclcpp
-  ${roboclaw_ros_DEPENDENCY}
+  ${roboclaw_DEPENDENCY}
   std_msgs # TODO remove when roboclaw messages are defined
   geometry_msgs
   wall_e_interfaces
@@ -61,7 +64,7 @@ ament_target_dependencies(wall_e_kinematics
 add_executable(wall_e_jsp src/nodes/wall_e_jsp.cpp)
 ament_target_dependencies(wall_e_jsp
   rclcpp
-  ${roboclaw_ros_DEPENDENCY}
+  ${roboclaw_DEPENDENCY}
   std_msgs # TODO remove when roboclaw messages are defined
   sensor_msgs
   wall_e_interfaces
