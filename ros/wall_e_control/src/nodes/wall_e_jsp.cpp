@@ -235,18 +235,22 @@ private:
     joint_state.header.stamp = msg.stamp;
     joint_state.name.push_back(joint_name);
     // check that the position is valid
-    if (msg.valid_positon){
+    if (msg.valid_positon)
+    {
       joint_state.position.push_back(msg.position);
     }
-    else{
-      RCLCPP_ERROR_STREAM(get_logger(), "invalid position from joint name: " << joint_name);
+    else
+    {
+      RCLCPP_ERROR_STREAM(get_logger(), "Invalid position received for joint " << joint_name);
     }
     // check that the velocity is valid
-    if (msg.valid_velocity){
+    if (msg.valid_velocity)
+    {
       joint_state.velocity.push_back(msg.velocity);
     }
-    else{
-      RCLCPP_ERROR_STREAM(get_logger(), "invalid velocity from joint name: " << joint_name);
+    else
+    {
+      RCLCPP_ERROR_STREAM(get_logger(), "Invalid velocity from joint " << joint_name);
     }
 
     // Publish wheel joint state

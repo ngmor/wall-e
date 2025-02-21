@@ -10,7 +10,6 @@ find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
-find_package(std_msgs REQUIRED) # TODO remove when roboclaw messages defined
 find_package(std_srvs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
@@ -55,7 +54,6 @@ target_link_libraries(wall_e_kinematics
 ament_target_dependencies(wall_e_kinematics
   rclcpp
   ${roboclaw_DEPENDENCY}
-  std_msgs # TODO remove when roboclaw messages are defined
   geometry_msgs
   wall_e_interfaces
 )
@@ -65,7 +63,6 @@ add_executable(wall_e_jsp src/nodes/wall_e_jsp.cpp)
 ament_target_dependencies(wall_e_jsp
   rclcpp
   ${roboclaw_DEPENDENCY}
-  std_msgs # TODO remove when roboclaw messages are defined
   sensor_msgs
   wall_e_interfaces
 )
