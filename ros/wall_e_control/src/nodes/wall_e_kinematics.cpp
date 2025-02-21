@@ -27,8 +27,7 @@
 
 // Motor controller specific includes
 #ifdef USE_ROBOCLAW
-// TODO fix when roboclaw messages are defined
-#include <std_msgs/msg/empty.hpp>
+#include <roboclaw_interfaces/msg/velocity_setpoint.hpp>
 #else
 #include <wall_e_interfaces/msg/drive_motor_speed.hpp>
 #endif
@@ -50,8 +49,8 @@ private:
 
   // Motor controller specific members
 #ifdef USE_ROBOCLAW
-  rclcpp::Publisher<std_msgs::msg::Empty>::SharedPtr pub_wheel_left_ = nullptr; // TODO fix when roboclaw messages are defined
-  rclcpp::Publisher<std_msgs::msg::Empty>::SharedPtr pub_wheel_right_ = nullptr; // TODO fix when roboclaw messages are defined
+  rclcpp::Publisher<roboclaw_interfaces::msg::VelocitySetpoint>::SharedPtr pub_wheel_left_ = nullptr;
+  rclcpp::Publisher<roboclaw_interfaces::msg::VelocitySetpoint>::SharedPtr pub_wheel_right_ = nullptr;
 #else
   rclcpp::Publisher<wall_e_interfaces::msg::DriveMotorSpeed>::SharedPtr pub_linear_speed_ = nullptr;
   rclcpp::Publisher<wall_e_interfaces::msg::DriveMotorSpeed>::SharedPtr pub_turn_speed_ = nullptr;
@@ -114,11 +113,11 @@ public:
 
     // MOTOR CONTROLLER SPECIFIC INITS ------------------------------------------------------------
   #ifdef USE_ROBOCLAW
-    pub_wheel_left_ = create_publisher<std_msgs::msg::Empty>(  // TODO fix when roboclaw messages are defined
+    pub_wheel_left_ = create_publisher<roboclaw_interfaces::msg::VelocitySetpoint>(
       "drive/left/velocity_setpoint",
       rclcpp::QoS{10}
     );
-    pub_wheel_right_ = create_publisher<std_msgs::msg::Empty>(  // TODO fix when roboclaw messages are defined
+    pub_wheel_right_ = create_publisher<roboclaw_interfaces::msg::VelocitySetpoint>(
       "drive/right/velocity_setpoint",
       rclcpp::QoS{10}
     );
@@ -195,8 +194,8 @@ private:
 
     // Construct wheel commands
   #ifdef USE_ROBOCLAW
-    std_msgs::msg::Empty wheel_cmd_left; // TODO fix when roboclaw messages are defined
-    std_msgs::msg::Empty wheel_cmd_right; // TODO fix when roboclaw messages are defined
+    roboclaw_interfaces::msg::VelocitySetpoint wheel_cmd_left;
+    roboclaw_interfaces::msg::VelocitySetpoint wheel_cmd_right;
     pub_wheel_left_->publish(wheel_cmd_left);
     pub_wheel_right_->publish(wheel_cmd_right);
   #else

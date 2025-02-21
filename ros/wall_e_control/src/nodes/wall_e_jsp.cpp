@@ -27,8 +27,7 @@
 
 // Motor controller specific includes
 #ifdef USE_ROBOCLAW
-// TODO fix when roboclaw messages are defined
-#include <std_msgs/msg/empty.hpp>
+#include <roboclaw_interfaces/msg/motor_feedback.hpp>
 #endif
 
 const std::vector<std::string> SERVO_NAMES = {
@@ -97,11 +96,11 @@ private:
 
   // Motor controller specific members
 #ifdef USE_ROBOCLAW
-  rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr sub_wheel_left_ = nullptr; // TODO fix when roboclaw messages are defined
-  rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr sub_wheel_right_ = nullptr; // TODO fix when roboclaw messages are defined
+  rclcpp::Subscription<roboclaw_interfaces::msg::MotorFeedback>::SharedPtr sub_wheel_left_ = nullptr;
+  rclcpp::Subscription<roboclaw_interfaces::msg::MotorFeedback>::SharedPtr sub_wheel_right_ = nullptr;
 #else
   rclcpp::TimerBase::SharedPtr tmr_wheel_dummy_ = nullptr;
-#endif
+#endif  
 
 public:
 
@@ -170,20 +169,18 @@ public:
 
     // MOTOR CONTROLLER SPECIFIC INITS ------------------------------------------------------------
   #ifdef USE_ROBOCLAW
-    sub_wheel_left_ = create_subscription<std_msgs::msg::Empty>( // TODO fix when roboclaw messages are defined
+    sub_wheel_left_ = create_subscription<roboclaw_interfaces::msg::MotorFeedback>(
       "drive/left/feedback",
       rclcpp::QoS{10},
-      // TODO fix when roboclaw messages are defined
-      [this](const std_msgs::msg::Empty& msg)
+      [this](const roboclaw_interfaces::msg::MotorFeedback& msg)
       {
         sub_wheel_callback(WHEEL_LEFT_JOINT, msg);
       }
     );
-    sub_wheel_right_ = create_subscription<std_msgs::msg::Empty>( // TODO fix when roboclaw messages are defined
+    sub_wheel_right_ = create_subscription<roboclaw_interfaces::msg::MotorFeedback>(
       "drive/right/feedback",
       rclcpp::QoS{10},
-      // TODO fix when roboclaw messages are defined
-      [this](const std_msgs::msg::Empty& msg)
+      [this](const roboclaw_interfaces::msg::MotorFeedback& msg)
       {
         sub_wheel_callback(WHEEL_RIGHT_JOINT, msg);
       }
@@ -231,14 +228,27 @@ private:
   /// @brief Receive a wheel feedback message and convert it to a joint state to send out
   /// @param joint_name the name of the joint
   /// @param msg msg to convert
-  void sub_wheel_callback(const std::string& joint_name, const std_msgs::msg::Empty& msg)
+  void sub_wheel_callback(const std::string& joint_name, const roboclaw_interfaces::msg::MotorFeedback msg)
   {
     // Convert feedback to joint state
     sensor_msgs::msg::JointState joint_state;
-    joint_state.header.stamp = get_clock()->now(); // TODO get timestamp from message when roboclaw messages are defined
+    joint_state.header.stamp.sec = msg.sec;
+    joint_state.header.stamp.nanosec = msg.nanosec;
     joint_state.name.push_back(joint_name);
-    joint_state.position.push_back(0.0); // TODO get position from message when roboclaw messages are defined
-    joint_state.velocity.push_back(0.0); // TODO get velocity from message when roboclaw messages are defined
+    // check that the position is valid
+    if (msg.valid_positon){
+      joint_state.position.push_back(msg.position);
+    }
+    else{
+      RCLCPP_ERROR_STREAM(get_logger(), "invalid position from joint name: " << joint_name);
+    }
+    // check that the velocity is valid
+    if (msg.valid_velocity){
+      joint_state.velocity.push_back(msg.velocity);
+    }
+    else{
+      RCLCPP_ERROR_STREAM(get_logger(), "invalid velocity from joint name: " << joint_name);
+    }
 
     // Publish wheel joint state
     pub_joint_states_->publish(joint_state);
