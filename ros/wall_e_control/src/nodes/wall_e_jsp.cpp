@@ -232,8 +232,7 @@ private:
   {
     // Convert feedback to joint state
     sensor_msgs::msg::JointState joint_state;
-    joint_state.header.stamp.sec = msg.sec;
-    joint_state.header.stamp.nanosec = msg.nanosec;
+    joint_state.header.stamp = msg.stamp;
     joint_state.name.push_back(joint_name);
     // check that the position is valid
     if (msg.valid_positon){
