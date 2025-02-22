@@ -239,17 +239,15 @@ private:
     if (msg.valid_positon)
     {
       joint_state.position.push_back(msg.position);
-      publish = 1;
     }
     // check that the velocity is valid
     if (msg.valid_velocity)
     {
       joint_state.velocity.push_back(msg.velocity);
-      publish = 1;
     }
 
     // Publish wheel joint state
-    if (publish){
+    if (msg.valid_velocity || msg.valid_velocity){
       pub_joint_states_->publish(joint_state);
     }
   }
