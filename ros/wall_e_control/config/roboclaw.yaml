@@ -1,5 +1,7 @@
 /**:
   ros__parameters:
+    device: /dev/roboclaw
+    baudrate: 115200
     controllers:
       drive:
         address: 0x80

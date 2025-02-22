@@ -6,10 +6,6 @@
   <arg name="roboclaw_enable" default="true"
     description="Use RoboClaw motor controller instead of Arduino motor shield"
   />
-  <arg name="roboclaw_device" default="/dev/roboclaw"
-    if="$(var roboclaw_enable)"
-    description="Serial device port for RoboClaw"
-  />
   <arg name="roboclaw_config_file" default="$(find-pkg-share wall_e_control)/config/roboclaw.yaml"
     if="$(var roboclaw_enable)"
     description="File path of config file for the RoboClaw node"
@@ -39,7 +35,6 @@
   <!-- Run RoboClaw node -->
   <node pkg="roboclaw_ros" exec="roboclaw_controller" output="screen" if="$(var roboclaw_enable)">
     <param from="$(var roboclaw_config_file)"/>
-    <param name="device" value="$(var roboclaw_device)"/>
   </node>
 
   <!-- Run audio node -->
