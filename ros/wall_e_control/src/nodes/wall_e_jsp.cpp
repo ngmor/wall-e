@@ -234,27 +234,24 @@ private:
     sensor_msgs::msg::JointState joint_state;
     joint_state.header.stamp = msg.stamp;
     joint_state.name.push_back(joint_name);
+    int publish = 0;
     // check that the position is valid
     if (msg.valid_positon)
     {
       joint_state.position.push_back(msg.position);
-    }
-    else
-    {
-      RCLCPP_ERROR_STREAM(get_logger(), "Invalid position received for joint " << joint_name);
+      publish = 1;
     }
     // check that the velocity is valid
     if (msg.valid_velocity)
     {
       joint_state.velocity.push_back(msg.velocity);
-    }
-    else
-    {
-      RCLCPP_ERROR_STREAM(get_logger(), "Invalid velocity from joint " << joint_name);
+      publish = 1;
     }
 
     // Publish wheel joint state
-    pub_joint_states_->publish(joint_state);
+    if (publish){
+      pub_joint_states_->publish(joint_state);
+    }
   }
 #else
   void tmr_wheel_dummy_callback()

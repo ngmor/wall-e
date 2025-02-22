@@ -196,6 +196,8 @@ private:
   #ifdef USE_ROBOCLAW
     roboclaw_interfaces::msg::VelocitySetpoint wheel_cmd_left;
     roboclaw_interfaces::msg::VelocitySetpoint wheel_cmd_right;
+    wheel_cmd_left.velocity = wheel_vel.left;
+    wheel_cmd_right.velocity = wheel_vel.right;
     pub_wheel_left_->publish(wheel_cmd_left);
     pub_wheel_right_->publish(wheel_cmd_right);
   #else
