@@ -1,5 +1,5 @@
 /**:
   ros__parameters:
-    track_width: 0.1 # TODO update with actual value
-    drive_radius: 0.1 # TODO update with actual value
-    motor_speed_max: 0.1 # TODO update with actual value
+    track_width: 0.23145 # m
+    drive_radius: 0.035 # m
+    motor_speed_max: 13.25 # rad/s, calculated from 13500 qpps max speed with 6400 counts per rotation
