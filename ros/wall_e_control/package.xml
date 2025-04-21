@@ -15,8 +15,12 @@
 
   <exec_depend>ros2launch</exec_depend>
   <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>roboclaw_ros</exec_depend>
 
   <depend>std_srvs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>roboclaw_interfaces</depend>
   <depend>wall_e_interfaces</depend>
 
   <export>

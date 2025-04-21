@@ -8,6 +8,7 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
+find_package(builtin_interfaces REQUIRED)
 
 file(GLOB_RECURSE MESSAGES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} msg/*)
 file(GLOB_RECURSE SERVICES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} srv/*)
@@ -15,8 +16,8 @@ file(GLOB_RECURSE SERVICES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} srv/*)
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${MESSAGES}
   ${SERVICES}
-  # DEPENDENCIES
-  # TODO add
+  DEPENDENCIES
+  builtin_interfaces
 )
 
 if(BUILD_TESTING)

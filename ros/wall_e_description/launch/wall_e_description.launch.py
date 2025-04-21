@@ -46,9 +46,10 @@ def generate_launch_description():
             choices=['gui', 'normal', 'none'],
             description='Options for starting joint state publisher.',
         ),
-        SetLaunchConfiguration(
+        DeclareLaunchArgument(
             name='namespace',
-            value='wall_e',
+            default_value='',
+            description='Namespace to apply to all nodes'
         ),
         Node(
             package='robot_state_publisher',

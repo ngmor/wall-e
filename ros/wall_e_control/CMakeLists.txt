@@ -11,9 +11,61 @@ find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(std_srvs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(roboclaw_interfaces QUIET)
 find_package(wall_e_interfaces REQUIRED)
 
+# Logic to choose whether or not to use RoboClaw motor controller
+# Instead of Arduino motor shield
+# TODO document
+if(NOT DEFINED DISABLE_ROBOCLAW)
+  set(DISABLE_ROBOCLAW OFF)
+endif()
+
+if(${roboclaw_interfaces_FOUND} AND NOT ${DISABLE_ROBOCLAW})
+  set(USE_ROBOCLAW ON)
+else()
+  set(USE_ROBOCLAW OFF)
+endif()
+
+if(USE_ROBOCLAW)
+  message(STATUS "Building with RoboClaw interfaces for drive motors")
+  add_compile_definitions(USE_ROBOCLAW)
+  set(roboclaw_DEPENDENCY roboclaw_interfaces)
+else()
+  message(STATUS "Building with default Arduino interfaces for driver motors")
+endif()
+
 # Build
+
+# Kinematics library
+file(GLOB_RECURSE WALL_E_KINEMATICS_LIB_SRC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/kinematics/*)
+add_library(wall_e_kinematics_lib ${WALL_E_KINEMATICS_LIB_SRC})
+target_include_directories(wall_e_kinematics_lib
+  PUBLIC include
+)
+
+# WALL-E kinematics node
+add_executable(wall_e_kinematics src/nodes/wall_e_kinematics.cpp)
+target_link_libraries(wall_e_kinematics
+  wall_e_kinematics_lib
+)
+ament_target_dependencies(wall_e_kinematics
+  rclcpp
+  ${roboclaw_DEPENDENCY}
+  geometry_msgs
+  wall_e_interfaces
+)
+
+# WALL-E joint state publisher node
+add_executable(wall_e_jsp src/nodes/wall_e_jsp.cpp)
+ament_target_dependencies(wall_e_jsp
+  rclcpp
+  ${roboclaw_DEPENDENCY}
+  sensor_msgs
+  wall_e_interfaces
+)
 
 # Install
 
@@ -33,6 +85,13 @@ install(PROGRAMS
 # WALL-E arduino node
 install(PROGRAMS
   src/nodes/wall_e_arduino.py RENAME wall_e_arduino
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+# WALL-E C++ nodes
+install(TARGETS
+  wall_e_kinematics
+  wall_e_jsp
   DESTINATION lib/${PROJECT_NAME}
 )
 
